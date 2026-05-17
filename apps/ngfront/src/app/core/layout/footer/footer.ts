@@ -39,11 +39,11 @@ export class Footer {
 
   // Social Media Links
   socialLinks = [
-    { icon: 'pi pi-instagram', url: 'https://instagram.com/freshcart', label: 'Instagram' },
-    { icon: 'pi pi-facebook', url: 'https://facebook.com/freshcart', label: 'Facebook' },
-    { icon: 'pi pi-twitter', url: 'https://twitter.com/freshcart', label: 'Twitter' },
-    { icon: 'pi pi-linkedin', url: 'https://linkedin.com/company/freshcart', label: 'LinkedIn' },
-    { icon: 'pi pi-youtube', url: 'https://youtube.com/freshcart', label: 'YouTube' }
+    { icon: 'pi pi-instagram', url: 'https://instagram.com/medusajs', label: 'Instagram' },
+    { icon: 'pi pi-facebook', url: 'https://facebook.com/medusajs', label: 'Facebook' },
+    { icon: 'pi pi-twitter', url: 'https://twitter.com/medusajs', label: 'Twitter' },
+    { icon: 'pi pi-linkedin', url: 'https://linkedin.com/company/medusajs', label: 'LinkedIn' },
+    { icon: 'pi pi-youtube', url: 'https://youtube.com/medusajs', label: 'YouTube' }
   ];
 
   // Payment Partners with PrimeNG Icons
@@ -66,14 +66,14 @@ export class Footer {
   onSubscribe(): void {
     if (this.newsletterForm.valid) {
       const email = this.newsletterForm.get('email')?.value;
-      
+
       // TODO: Implement actual newsletter subscription logic
       this.messageService.add({
         severity: 'success',
         summary: 'Success',
         detail: 'Successfully subscribed to newsletter!'
       });
-      
+
       this.newsletterForm.reset();
     } else {
       this.messageService.add({
@@ -103,10 +103,10 @@ export class Footer {
    * Open app store links
    */
   openAppStore(): void {
-    window.open('https://apps.apple.com/app/freshcart', '_blank', 'noopener,noreferrer');
+    window.open('https://medusajs.com', '_blank', 'noopener,noreferrer');
   }
 
   openGooglePlay(): void {
-    window.open('https://play.google.com/store/apps/details?id=com.freshcart', '_blank', 'noopener,noreferrer');
+    window.open('https://medusajs.com', '_blank', 'noopener,noreferrer');
   }
 }

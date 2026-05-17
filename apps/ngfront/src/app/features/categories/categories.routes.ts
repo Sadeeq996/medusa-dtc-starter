@@ -9,19 +9,19 @@ export const categoriesRoutes: Routes = [
   {
     path: '',
     loadComponent: () => import('./components/category-list/category-list').then(m => m.CategoryListComponent),
-    title: 'Categories - FreshCart',
-    data: { 
-      description: 'Browse all categories on FreshCart',
-      keywords: 'categories, shopping categories, product categories, FreshCart' 
+    title: 'Categories - Sellpadi',
+    data: {
+      description: 'Browse all categories on Sellpadi',
+      keywords: 'categories, shopping categories, product categories, Sellpadi'
     }
   },
   {
     path: ':slug',
     loadComponent: () => import('./components/category-details/category-details').then(m => m.CategoryDetailsComponent),
-    title: 'Category Details - FreshCart',
-    data: { 
+    title: 'Category Details - Sellpadi',
+    data: {
       description: 'View category details and products',
-      keywords: 'category details, products by category, FreshCart' 
+      keywords: 'category details, products by category, Sellpadi'
     }
   }
 ];

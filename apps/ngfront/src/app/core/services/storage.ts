@@ -5,7 +5,7 @@ import { getUserIdFromToken } from '../../shared/utils/jwt.utils';
 
 /**
  * Storage Service
- * Handles localStorage and sessionStorage operations for FreshCart
+ * Handles localStorage and sessionStorage operations for Sellpadi
  * Based on real API testing and authentication requirements
  */
 @Injectable({
@@ -195,11 +195,11 @@ export class StorageService {
    */
   getCurrentUserId(): string | null {
     const token = this.getToken();
-    
+
     if (!token) {
       return null;
     }
-    
+
     // Always decode JWT token to extract user ID
     return getUserIdFromToken(token);
   }

@@ -10,7 +10,7 @@ import Aura from '@primeuix/themes/aura';
  * Feel: Modern, clean, and trustworthy
  * 
  * This preset uses Teal as the primary color which conveys freshness,
- * trust, and modernity - perfect for FreshCart's brand identity.
+ * trust, and modernity - perfect for Sellpadi's brand identity.
  * Zinc surfaces provide clean, professional backgrounds with excellent
  * contrast for accessibility in both light and dark modes.
  */

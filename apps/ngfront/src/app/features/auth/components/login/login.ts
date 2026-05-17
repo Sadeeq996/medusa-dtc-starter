@@ -21,7 +21,7 @@ import { LoginCredentials } from '../../../../core/models/user.model';
 /**
  * Login Component
  * User login form with validation
- * Based on FreshCart BRD requirements and API specifications
+ * Based on Sellpadi BRD requirements and API specifications
  */
 @Component({
   selector: 'app-login',
@@ -108,7 +108,7 @@ export class LoginComponent {
       next: (response) => {
         this.isLoading.set(false);
         this.successMessage.set('Login successful! Redirecting...');
-        
+
         // Redirect after short delay
         setTimeout(() => {
           const returnUrl = this.route.snapshot.queryParams['returnUrl'];

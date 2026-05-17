@@ -11,61 +11,56 @@
  * - This interface represents GET/PUT/DELETE responses with full product objects
  * - We never directly consume POST responses, so product is always CartProductObject
  */
-export interface CartApiResponse {
-  status: string;                     // "success"
-  message?: string;                   // Present in some responses
-  numOfCartItems: number;             // Total items count
-  cartId: string;                     // Cart ID
-  data: {
-    _id: string;
-    cartOwner: string;
-    products: Array<{
-      count: number;
-      _id: string;
-      product: CartProductObject;     // Always full object (we use GET, not POST response)
-      price: number;
-    }>;
-    createdAt: string;
-    updatedAt: string;
-    __v: number;
-    totalCartPrice: number;
+export interface CartLineItem {
+  id: string;
+  variant_id: string;
+  quantity: number;
+  unit_price: number;
+  title?: string;
+  thumbnail?: string;
+  product?: {
+    id?: string;
+    title?: string;
+    thumbnail?: string;
   };
 }
 
+export interface CartApiResponse {
+  id: string;
+  items: CartLineItem[];
+  subtotal?: number;
+  total?: number;
+}
+
 /**
- * Cart Product Object Structure (returned by GET/PUT/DELETE endpoints)
- * Based on real API testing: GET /cart returns this structure
- * Updated: 2025-09-30 - Matches actual API response
- * 
- * ⚠️ NOTE: This is a SUBSET of the full Product interface
- * - Price is stored at cart item level, NOT in product
- * - Missing: price, priceAfterDiscount, description, slug, images[], sold, createdAt, updatedAt, ratingsQuantity
+ * Cart Product Object Structure
+ * Simplified and compatible with Medusa store cart item payloads.
  */
 export interface CartProductObject {
   _id: string;
-  title: string;
-  imageCover: string;
-  quantity: number;                   // Available stock quantity (NOT cart quantity)
-  ratingsAverage: number;
-  subcategory: Array<{
-    _id: string;
-    name: string;
-    slug: string;
-    category: string;
+  title?: string;
+  imageCover?: string;
+  quantity?: number;                   // Available stock quantity (NOT cart quantity)
+  ratingsAverage?: number;
+  subcategory?: Array<{
+    _id?: string;
+    name?: string;
+    slug?: string;
+    category?: string;
   }>;
-  category: {
-    _id: string;
-    name: string;
-    slug: string;
-    image: string;
+  category?: {
+    _id?: string;
+    name?: string;
+    slug?: string;
+    image?: string;
   };
-  brand: {
-    _id: string;
-    name: string;
-    slug: string;
-    image: string;
+  brand?: {
+    _id?: string;
+    name?: string;
+    slug?: string;
+    image?: string;
   };
-  id: string;                         // Duplicate of _id (API quirk)
+  id?: string;                         // Duplicate of _id or variant identifier
 }
 
 /**
@@ -102,6 +97,7 @@ export interface CartState {
  */
 export interface AddToCartRequest {
   productId: string;                    // Product ID to add
+  quantity?: number;                    // Quantity to add (default 1)
 }
 
 /**

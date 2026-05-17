@@ -1,7 +1,7 @@
 import { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
 
 /**
- * Form Validation Utilities for FreshCart
+ * Form Validation Utilities for Sellpadi
  * Centralized validation logic following Angular best practices
  * 
  * NOTE: Checkout-specific validators (phone, address, city) are in checkout.validators.ts
@@ -41,23 +41,23 @@ export function passwordMatchValidator(passwordField: string = 'password', confi
   return (control: AbstractControl): ValidationErrors | null => {
     const password = control.get(passwordField);
     const confirmPassword = control.get(confirmField);
-    
+
     if (!password || !confirmPassword) {
       return null;
     }
-    
+
     if (password.value !== confirmPassword.value) {
       confirmPassword.setErrors({ ...confirmPassword.errors, passwordMismatch: true });
       return { passwordMismatch: true };
     }
-    
+
     // Clear the error if passwords match
     if (confirmPassword.hasError('passwordMismatch')) {
       const errors = { ...confirmPassword.errors };
       delete errors['passwordMismatch'];
       confirmPassword.setErrors(Object.keys(errors).length > 0 ? errors : null);
     }
-    
+
     return null;
   };
 }
@@ -68,10 +68,10 @@ export function passwordMatchValidator(passwordField: string = 'password', confi
 export function egyptianPhoneValidator(): ValidatorFn {
   return (control: AbstractControl): ValidationErrors | null => {
     if (!control.value) return null;
-    
+
     const cleaned = control.value.toString().replace(/\s/g, '');
     const isValid = VALIDATION_PATTERNS.EGYPTIAN_PHONE.test(cleaned);
-    
+
     return isValid ? null : { egyptianPhone: true };
   };
 }
@@ -82,9 +82,9 @@ export function egyptianPhoneValidator(): ValidatorFn {
 export function strongPasswordValidator(): ValidatorFn {
   return (control: AbstractControl): ValidationErrors | null => {
     if (!control.value) return null;
-    
+
     const isValid = VALIDATION_PATTERNS.STRONG_PASSWORD.test(control.value);
-    
+
     return isValid ? null : { strongPassword: true };
   };
 }
@@ -95,9 +95,9 @@ export function strongPasswordValidator(): ValidatorFn {
  */
 export function getValidationError(control: AbstractControl): string | null {
   if (!control.errors || !control.touched) return null;
-  
+
   const errors = control.errors;
-  
+
   if (errors['required']) return VALIDATION_MESSAGES.required;
   if (errors['email']) return VALIDATION_MESSAGES.email;
   if (errors['egyptianPhone']) return VALIDATION_MESSAGES.egyptianPhone;
@@ -106,7 +106,7 @@ export function getValidationError(control: AbstractControl): string | null {
   if (errors['minlength']) return VALIDATION_MESSAGES.minlength(errors['minlength'].requiredLength);
   if (errors['maxlength']) return VALIDATION_MESSAGES.maxlength(errors['maxlength'].requiredLength);
   if (errors['pattern']) return VALIDATION_MESSAGES.pattern;
-  
+
   // Return first error message if no specific match
   return 'Invalid input';
 }

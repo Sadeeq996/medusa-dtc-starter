@@ -1,10 +1,10 @@
-<!-- FreshCart Footer - Following BRD Requirements -->
+<!-- Sellpadi Footer - Following BRD Requirements -->
 <footer class="mt-auto border-t border-surface">
-  
+
   <!-- Main Footer Content -->
   <div class="max-w-7xl mx-auto px-4 py-8">
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-      
+
       <!-- Newsletter Subscription Section -->
       <div class="lg:col-span-2">
         <h3 class="text-lg font-semibold text-color mb-2">
@@ -13,65 +13,43 @@
         <p class="text-muted-color mb-4">
           {{ 'FOOTER.DELIVERY_INFO' | translate }}
         </p>
-        
+
         <!-- Newsletter Form -->
         <form [formGroup]="newsletterForm" (ngSubmit)="onSubscribe()" class="max-w-md">
           <p-inputgroup>
-            <input 
-              pInputText 
-              type="email" 
-              formControlName="email"
-              [placeholder]="'FOOTER.EMAIL_PLACEHOLDER' | translate"
-              [invalid]="isEmailInvalid()" />
+            <input pInputText type="email" formControlName="email"
+              [placeholder]="'FOOTER.EMAIL_PLACEHOLDER' | translate" [invalid]="isEmailInvalid()" />
             <p-inputgroup-addon>
-              <p-button 
-                type="submit"
-                [label]="'FOOTER.SUBSCRIBE' | translate"
-                icon="pi pi-send"
-                severity="primary"
+              <p-button type="submit" [label]="'FOOTER.SUBSCRIBE' | translate" icon="pi pi-send" severity="primary"
                 [disabled]="newsletterForm.invalid">
               </p-button>
             </p-inputgroup-addon>
           </p-inputgroup>
-          
+
           <!-- Email Validation Message -->
           @if (isEmailInvalid()) {
-            <p-message 
-              severity="error" 
-              size="small" 
-              variant="simple"
-              text="Please enter a valid email address"
-              class="mt-2">
-            </p-message>
+          <p-message severity="error" size="small" variant="simple" text="Please enter a valid email address"
+            class="mt-2">
+          </p-message>
           }
         </form>
       </div>
-      
+
       <!-- App Download Section -->
       <div>
         <h4 class="text-md font-semibold text-color mb-4">
           {{ 'FOOTER.DOWNLOAD_APP' | translate }}
         </h4>
         <div class="flex flex-col gap-2">
-          <p-button 
-            (click)="openAppStore()"
-            [label]="'FOOTER.APP_STORE' | translate"
-            icon="pi pi-apple"
-            severity="secondary"
-            [text]="true"
-            styleClass="w-full justify-start">
+          <p-button (click)="openAppStore()" [label]="'FOOTER.APP_STORE' | translate" icon="pi pi-apple"
+            severity="secondary" [text]="true" styleClass="w-full justify-start">
           </p-button>
-          <p-button 
-            (click)="openGooglePlay()"
-            [label]="'FOOTER.GOOGLE_PLAY' | translate"
-            icon="pi pi-android"
-            severity="secondary"
-            [text]="true"
-            styleClass="w-full justify-start">
+          <p-button (click)="openGooglePlay()" [label]="'FOOTER.GOOGLE_PLAY' | translate" icon="pi pi-android"
+            severity="secondary" [text]="true" styleClass="w-full justify-start">
           </p-button>
         </div>
       </div>
-      
+
       <!-- Social Media Section -->
       <div>
         <h4 class="text-md font-semibold text-color mb-4">
@@ -79,24 +57,18 @@
         </h4>
         <div class="flex flex-wrap gap-2">
           @for (social of socialLinks; track social.label) {
-            <p-button 
-              (click)="openSocialLink(social.url)"
-              [icon]="social.icon"
-              [aria-label]="social.label"
-              severity="secondary"
-              [text]="true"
-              [rounded]="true"
-              size="small"
-              styleClass="hover:-translate-y-0.5 transition-transform duration-200">
-            </p-button>
+          <p-button (click)="openSocialLink(social.url)" [icon]="social.icon" [aria-label]="social.label"
+            severity="secondary" [text]="true" [rounded]="true" size="small"
+            styleClass="hover:-translate-y-0.5 transition-transform duration-200">
+          </p-button>
           }
         </div>
       </div>
     </div>
-    
+
     <!-- Divider -->
     <p-divider></p-divider>
-    
+
     <!-- Payment Partners Section -->
     <div class="mt-6">
       <h4 class="text-md font-semibold text-color text-center mb-4">
@@ -104,37 +76,34 @@
       </h4>
       <div class="flex justify-center items-center gap-6 flex-wrap">
         @for (partner of paymentPartners; track partner.name) {
-          <div class="p-2 flex flex-col items-center gap-1 transition-transform duration-200 hover:-translate-y-0.5">
-            <i 
-              [class]="partner.icon"
-              [style.color]="partner.color"
-              [attr.aria-label]="partner.name"
-              class="text-2xl opacity-70 hover:opacity-100 hover:scale-110 transition-all duration-200">
-            </i>
-            <span class="text-xs text-muted-color font-medium">
-              {{ partner.name }}
-            </span>
-          </div>
+        <div class="p-2 flex flex-col items-center gap-1 transition-transform duration-200 hover:-translate-y-0.5">
+          <i [class]="partner.icon" [style.color]="partner.color" [attr.aria-label]="partner.name"
+            class="text-2xl opacity-70 hover:opacity-100 hover:scale-110 transition-all duration-200">
+          </i>
+          <span class="text-xs text-muted-color font-medium">
+            {{ partner.name }}
+          </span>
+        </div>
         }
       </div>
     </div>
   </div>
-  
+
   <!-- Footer Bottom -->
   <div class="py-4 border-t border-surface mt-8">
     <div class="max-w-7xl mx-auto px-4">
       <div class="flex flex-col items-center justify-center gap-2 text-center">
-        
+
         <!-- Copyright -->
         <p class="text-sm text-muted-color">
           {{ 'FOOTER.COPYRIGHT' | translate }}
         </p>
-        
+
         <!-- Brand Name -->
         <span class="text-primary font-semibold">
           {{ 'COMMON.APP_NAME' | translate }}
         </span>
-        
+
       </div>
     </div>
   </div>

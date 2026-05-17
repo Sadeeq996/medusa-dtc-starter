@@ -13,7 +13,9 @@
     "test": "turbo test",
     "backend:seed": "turbo seed --filter=@dtc/backend",
     "backend:dev": "turbo dev --filter=@dtc/backend",
-    "storefront:dev": "turbo dev --filter=@dtc/storefront"
+    "storefront:dev": "turbo dev --filter=@dtc/storefront",
+    "ngfront:dev": "turbo dev --filter=angular-ecommerce",
+    "ngfront:build": "turbo build --filter=angular-ecommerce"
   },
   "pnpm": {
     "overrides": {

@@ -6,12 +6,12 @@ import { ApiService } from '../../../core/services/api';
 import { StorageService } from '../../../core/services/storage';
 import { AuthService } from '../../auth/services/auth';
 import { extractErrorMessage } from '../../../shared/utils/error.utils';
-import { 
+import {
   CartApiResponse,
   CartProductObject,
-  CartItem, 
-  AddToCartRequest, 
-  UpdateCartItemRequest, 
+  CartItem,
+  AddToCartRequest,
+  UpdateCartItemRequest,
   RemoveFromCartRequest,
   CartPersistenceData,
   CartOperationResult
@@ -30,66 +30,99 @@ export class CartService {
   private readonly storage = inject(StorageService);
   private readonly authService = inject(AuthService);
 
-  // Cart API endpoints
+  // Cart API endpoints aligned with Medusa store API semantics
   private readonly CART_ENDPOINTS = {
-    GET_CART: '/cart',
-    ADD_TO_CART: '/cart',
-    UPDATE_CART_ITEM: '/cart',      // PUT /cart/{productId}
-    REMOVE_CART_ITEM: '/cart',      // DELETE /cart/{productId}
-    CLEAR_CART: '/cart'
+    CREATE_CART: '/carts',
+    GET_CART: (cartId: string) => `/carts/${cartId}`,
+    ADD_TO_CART: (cartId: string) => `/carts/${cartId}/line-items`,
+    UPDATE_CART_ITEM: (cartId: string, itemId: string) => `/carts/${cartId}/line-items/${itemId}`,
+    REMOVE_CART_ITEM: (cartId: string, itemId: string) => `/carts/${cartId}/line-items/${itemId}`,
+    CLEAR_CART: (cartId: string) => `/carts/${cartId}`
   };
 
-  // LocalStorage key for cart persistence
-  private readonly CART_STORAGE_KEY = 'freshcart_cart';
-  
+  // LocalStorage keys for cart persistence
+  private readonly CART_STORAGE_KEY = 'sellpadi_cart';
+  private readonly CART_ID_STORAGE_KEY = 'sellpadi_cart_id';
+
   // Cart expiration configuration
   private readonly CART_MAX_AGE_MS = 24 * 60 * 60 * 1000; // 24 hours
 
+  private getStoredCartId(): string | null {
+    return this.storage.getItem<string>(this.CART_ID_STORAGE_KEY);
+  }
+
+  private setStoredCartId(cartId: string): void {
+    this.storage.setItem(this.CART_ID_STORAGE_KEY, cartId);
+  }
+
+  private removeStoredCartId(): void {
+    this.storage.removeItem(this.CART_ID_STORAGE_KEY);
+  }
+
+  private createCart(): Observable<string> {
+    return this.api.post<CartApiResponse>(this.CART_ENDPOINTS.CREATE_CART, {})
+      .pipe(
+        map(response => {
+          if (!response?.id) {
+            throw new Error('Failed to create cart');
+          }
+          this.setStoredCartId(response.id);
+          return response.id;
+        })
+      );
+  }
+
+  private ensureCartId(): Observable<string> {
+    const cartId = this.getStoredCartId();
+
+    if (cartId) {
+      return of(cartId);
+    }
+
+    return this.createCart();
+  }
+
   /**
    * Get user's cart from API
-   * API: GET /cart
-   * ✅ Returns full cart with populated product objects
+   * API: GET /carts/{cartId}
    */
   getCart(): Observable<{ items: CartItem[]; cartId: string | null }> {
     if (!this.authService.isAuthenticated()) {
       return of({ items: [], cartId: null });
     }
 
-    return this.api.get<CartApiResponse>(this.CART_ENDPOINTS.GET_CART)
-      .pipe(
-        map(response => ({
-          items: this.transformApiCartToItems(response),
-          cartId: response.data._id
-        })),
-        catchError(error => {
-          console.error('Get cart error:', error);
-          return of({ items: [], cartId: null });
-        })
-      );
+    return this.ensureCartId().pipe(
+      switchMap(cartId =>
+        this.api.get<CartApiResponse>(this.CART_ENDPOINTS.GET_CART(cartId)).pipe(
+          map(response => ({
+            items: this.transformApiCartToItems(response),
+            cartId: response.id
+          }))
+        )
+      ),
+      catchError(error => {
+        console.error('Get cart error:', error);
+        return of({ items: [], cartId: null });
+      })
+    );
   }
 
   /**
    * Add product to cart
-   * API: POST /cart
-   * Body: { "productId": "..." }
-   * 
-   * ⚠️ IMPORTANT: 
-   * - POST /cart returns product as STRING ID only
-   * - POST always adds quantity = 1 (no quantity parameter supported)
-   * - Solution: Chain POST → GET to get full cart with populated products
+   * API: POST /carts/{cartId}/line-items
    */
   addToCart(request: AddToCartRequest): Observable<CartOperationResult> {
     if (!this.authService.isAuthenticated()) {
       return of({ success: false, message: 'Authentication required' });
     }
 
-    // Chain: POST /cart → GET /cart to get full product objects
-    return this.api.post<CartApiResponse>(this.CART_ENDPOINTS.ADD_TO_CART, {
-      productId: request.productId
-    }).pipe(
-      switchMap(postResponse => {
-        // POST succeeded - now GET the full cart with populated products
-        return this.getCart().pipe(
+    return this.ensureCartId().pipe(
+      switchMap(cartId =>
+        this.api.post<CartApiResponse>(this.CART_ENDPOINTS.ADD_TO_CART(cartId), {
+          variant_id: request.productId,
+          quantity: request.quantity || 1
+        }).pipe(
+          switchMap(() => this.getCart()),
           map(({ items, cartId }) => ({
             success: true,
             message: 'Product added to cart successfully',
@@ -105,8 +138,8 @@ export class CartService {
               isAuthenticated: true
             }
           }))
-        );
-      }),
+        )
+      ),
       catchError(error => {
         console.error('Add to cart error:', error);
         return of({
@@ -119,35 +152,46 @@ export class CartService {
 
   /**
    * Update cart item quantity
-   * API: PUT /cart/{productId}
-   * Body: { "count": "2" }
-   * 
-   * ✅ FIXED: Uses productId (NOT cart item ID) and count as string
+   * API: POST /carts/{cartId}/line-items/{itemId}
    */
   updateCartItem(request: UpdateCartItemRequest): Observable<CartOperationResult> {
     if (!this.authService.isAuthenticated()) {
       return of({ success: false, message: 'Authentication required' });
     }
 
-    return this.api.put<CartApiResponse>(
-      `${this.CART_ENDPOINTS.UPDATE_CART_ITEM}/${request.productId}`,
-      { count: request.count }
-    ).pipe(
-      map(response => ({
-        success: true,
-        message: 'Cart updated successfully',
-        cartId: response.data._id,
-        cart: {
-          items: this.transformApiCartToItems(response),
-          cartId: response.data._id,
-          isLoading: false,
-          loadingProductIds: [],
-          isSyncing: false,
-          error: null,
-          lastUpdated: Date.now(),
-          isAuthenticated: true
+    return this.getCart().pipe(
+      switchMap(({ items, cartId }) => {
+        if (!cartId) {
+          return of({ success: false, message: 'Cart not found' });
         }
-      })),
+
+        const lineItem = items.find(item => item.product._id === request.productId);
+        if (!lineItem) {
+          return of({ success: false, message: 'Cart item not found' });
+        }
+
+        return this.api.post<CartApiResponse>(
+          this.CART_ENDPOINTS.UPDATE_CART_ITEM(cartId, lineItem._id),
+          { item_id: lineItem._id, quantity: Number(request.count) }
+        ).pipe(
+          switchMap(() => this.getCart()),
+          map(({ items: updatedItems, cartId: updatedCartId }) => ({
+            success: true,
+            message: 'Cart updated successfully',
+            cartId: updatedCartId,
+            cart: {
+              items: updatedItems,
+              cartId: updatedCartId,
+              isLoading: false,
+              loadingProductIds: [],
+              isSyncing: false,
+              error: null,
+              lastUpdated: Date.now(),
+              isAuthenticated: true
+            }
+          }))
+        );
+      }),
       catchError(error => {
         console.error('Update cart item error:', error);
         return of({
@@ -160,33 +204,45 @@ export class CartService {
 
   /**
    * Remove item from cart
-   * API: DELETE /cart/{productId}
-   * 
-   * ✅ FIXED: Uses productId (NOT cart item ID)
+   * API: DELETE /carts/{cartId}/line-items/{itemId}
    */
   removeFromCart(request: RemoveFromCartRequest): Observable<CartOperationResult> {
     if (!this.authService.isAuthenticated()) {
       return of({ success: false, message: 'Authentication required' });
     }
 
-    return this.api.delete<CartApiResponse>(
-      `${this.CART_ENDPOINTS.REMOVE_CART_ITEM}/${request.productId}`
-    ).pipe(
-      map(response => ({
-        success: true,
-        message: 'Item removed from cart successfully',
-        cartId: response.data._id,
-        cart: {
-          items: this.transformApiCartToItems(response),
-          cartId: response.data._id,
-          isLoading: false,
-          loadingProductIds: [],
-          isSyncing: false,
-          error: null,
-          lastUpdated: Date.now(),
-          isAuthenticated: true
+    return this.getCart().pipe(
+      switchMap(({ items, cartId }) => {
+        if (!cartId) {
+          return of({ success: false, message: 'Cart not found' });
         }
-      })),
+
+        const lineItem = items.find(item => item.product._id === request.productId);
+        if (!lineItem) {
+          return of({ success: false, message: 'Cart item not found' });
+        }
+
+        return this.api.delete<CartApiResponse>(
+          this.CART_ENDPOINTS.REMOVE_CART_ITEM(cartId, lineItem._id)
+        ).pipe(
+          switchMap(() => this.getCart()),
+          map(({ items: updatedItems, cartId: updatedCartId }) => ({
+            success: true,
+            message: 'Item removed from cart successfully',
+            cartId: updatedCartId,
+            cart: {
+              items: updatedItems,
+              cartId: updatedCartId,
+              isLoading: false,
+              loadingProductIds: [],
+              isSyncing: false,
+              error: null,
+              lastUpdated: Date.now(),
+              isAuthenticated: true
+            }
+          }))
+        );
+      }),
       catchError(error => {
         console.error('Remove from cart error:', error);
         return of({
@@ -199,30 +255,49 @@ export class CartService {
 
   /**
    * Clear entire cart
-   * API: DELETE /cart
+   * API: DELETE /carts/{cartId}
    */
   clearCart(): Observable<CartOperationResult> {
     if (!this.authService.isAuthenticated()) {
       return of({ success: false, message: 'Authentication required' });
     }
 
-    return this.api.delete<{ message: string }>(this.CART_ENDPOINTS.CLEAR_CART)
-      .pipe(
-        map(response => ({
-          success: true,
-          message: 'Cart cleared successfully',
+    const cartId = this.getStoredCartId();
+    if (!cartId) {
+      return of({
+        success: true, message: 'Cart is already empty', cartId: null, cart: {
+          items: [],
           cartId: null,
-          cart: {
-            items: [],
+          isLoading: false,
+          loadingProductIds: [],
+          isSyncing: false,
+          error: null,
+          lastUpdated: Date.now(),
+          isAuthenticated: true
+        }
+      });
+    }
+
+    return this.api.delete<{ message: string }>(this.CART_ENDPOINTS.CLEAR_CART(cartId))
+      .pipe(
+        map(() => {
+          this.removeStoredCartId();
+          return {
+            success: true,
+            message: 'Cart cleared successfully',
             cartId: null,
-            isLoading: false,
-            loadingProductIds: [],
-            isSyncing: false,
-            error: null,
-            lastUpdated: Date.now(),
-            isAuthenticated: true
-          }
-        })),
+            cart: {
+              items: [],
+              cartId: null,
+              isLoading: false,
+              loadingProductIds: [],
+              isSyncing: false,
+              error: null,
+              lastUpdated: Date.now(),
+              isAuthenticated: true
+            }
+          };
+        }),
         catchError(error => {
           console.error('Clear cart error:', error);
           return of({
@@ -235,67 +310,65 @@ export class CartService {
 
   /**
    * Sync local cart with server (when user logs in)
-   * ✅ OPTIMIZED: All POSTs in parallel, then single GET
-   * 
-   * Before: N items = N*(POST+GET) = 2N API calls
-   * After: N items = N*POST + 1*GET = N+1 API calls (50% reduction)
    */
   syncCartWithServer(localItems: CartItem[]): Observable<CartOperationResult> {
     if (!this.authService.isAuthenticated() || localItems.length === 0) {
       return of({ success: true, message: 'No items to sync' });
     }
 
-    // Create array of POST operations (no GET chains, just POSTs)
-    const postOperations = localItems.map(item =>
-      this.api.post<CartApiResponse>(this.CART_ENDPOINTS.ADD_TO_CART, {
-        productId: item.product._id
-      }).pipe(
-        catchError(error => {
-          console.error(`Failed to sync item ${item.product._id}:`, error);
-          return of(null); // Continue with other items even if one fails
-        })
-      )
-    );
-    
-    // Execute all POSTs in parallel, then ONE final GET
-    return forkJoin(postOperations).pipe(
-      switchMap(results => {
-        const successCount = results.filter(r => r !== null).length;
-        const failCount = results.length - successCount;
-        
-        if (successCount === 0) {
-          return of({
-            success: false,
-            message: 'Failed to sync all items'
-          });
-        }
-        
-        // Get final cart state with full product data
-        return this.getCart().pipe(
-          map(({ items, cartId }) => ({
-            success: failCount === 0,
-            message: failCount === 0 
-              ? `Successfully synced ${successCount} items` 
-              : `Synced ${successCount} items, ${failCount} failed`,
-            cartId,
-            cart: {
-              items,
-              cartId,
-              isLoading: false,
-              loadingProductIds: [],
-              isSyncing: false,
-              error: null,
-              lastUpdated: Date.now(),
-              isAuthenticated: true
+    return this.ensureCartId().pipe(
+      switchMap(cartId => {
+        const postOperations = localItems.map(item =>
+          this.api.post<CartApiResponse>(this.CART_ENDPOINTS.ADD_TO_CART(cartId), {
+            variant_id: item.product._id,
+            quantity: item.quantity
+          }).pipe(
+            catchError(error => {
+              console.error(`Failed to sync item ${item.product._id}:`, error);
+              return of(null);
+            })
+          )
+        );
+
+        return forkJoin(postOperations).pipe(
+          switchMap(results => {
+            const successCount = results.filter(r => r !== null).length;
+            const failCount = results.length - successCount;
+
+            if (successCount === 0) {
+              return of({
+                success: false,
+                message: 'Failed to sync all items'
+              });
             }
-          }))
+
+            return this.getCart().pipe(
+              map(({ items, cartId }) => ({
+                success: failCount === 0,
+                message: failCount === 0
+                  ? `Successfully synced ${successCount} items`
+                  : `Synced ${successCount} items, ${failCount} failed`,
+                cartId,
+                cart: {
+                  items,
+                  cartId,
+                  isLoading: false,
+                  loadingProductIds: [],
+                  isSyncing: false,
+                  error: null,
+                  lastUpdated: Date.now(),
+                  isAuthenticated: true
+                }
+              }))
+            );
+          })
         );
       }),
       catchError(error => {
         console.error('Cart sync error:', error);
-        return of({ 
-          success: false, 
-          message: 'Failed to sync cart with server' 
+        return of({
+          success: false,
+          message: 'Failed to sync cart with server'
         });
       })
     );
@@ -313,7 +386,7 @@ export class CartService {
         lastUpdated: Date.now(),
         userId: this.authService.getCurrentUserId()
       };
-      
+
       this.storage.setItem(this.CART_STORAGE_KEY, JSON.stringify(cartData));
     } catch (error) {
       console.error('Failed to save cart to storage:', error);
@@ -331,7 +404,7 @@ export class CartService {
       try {
         const cartData: CartPersistenceData = JSON.parse(cartDataStr);
         if (!cartData || typeof cartData !== 'object') return [];
-        
+
         // Check if cart belongs to current user (if authenticated)
         const currentUserId = this.authService.getCurrentUserId();
         if (currentUserId && cartData.userId && cartData.userId !== currentUserId) {
@@ -379,14 +452,21 @@ export class CartService {
    * - quantity in product is STOCK quantity, not cart quantity
    */
   private transformApiCartToItems(response: CartApiResponse): CartItem[] {
-    return response.data.products.map((apiItem) => ({
-      _id: apiItem._id,
-      product: apiItem.product,             // CartProductObject from API
-      quantity: apiItem.count,              // Cart quantity (renamed from 'count')
-      unitPrice: apiItem.price,             // Price from cart item level
-      totalPrice: apiItem.price * apiItem.count,
-      addedAt: response.data.createdAt,
-      updatedAt: response.data.updatedAt
+    return response.items.map((item) => ({
+      _id: item.id,
+      product: {
+        _id: item.variant_id,
+        title: item.title || item.product?.title || 'Product',
+        imageCover: item.thumbnail || item.product?.thumbnail || '/assets/images/product-placeholder.jpg',
+        quantity: 0,
+        ratingsAverage: 0,
+        id: item.variant_id
+      },
+      quantity: item.quantity,
+      unitPrice: item.unit_price,
+      totalPrice: item.unit_price * item.quantity,
+      addedAt: '',
+      updatedAt: ''
     }));
   }
 }

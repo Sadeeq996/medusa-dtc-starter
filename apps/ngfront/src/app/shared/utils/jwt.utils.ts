@@ -5,7 +5,7 @@
 
 /**
  * JWT Payload Interface
- * Based on Route E-commerce API token structure
+ * Based on Sellpadi Store JWT payload structure
  * ⚠️ IMPORTANT: The API uses "id" not "userId" in the JWT payload
  */
 export interface JwtPayload {
@@ -26,16 +26,16 @@ export function decodeJwt(token: string): JwtPayload | null {
   try {
     // JWT structure: header.payload.signature
     const parts = token.split('.');
-    
+
     if (parts.length !== 3) {
       console.error('Invalid JWT token format');
       return null;
     }
-    
+
     // Decode the payload (second part)
     const payload = parts[1];
     const decoded = atob(payload.replace(/-/g, '+').replace(/_/g, '/'));
-    
+
     return JSON.parse(decoded) as JwtPayload;
   } catch (error) {
     console.error('Failed to decode JWT token:', error);
@@ -60,11 +60,11 @@ export function getUserIdFromToken(token: string): string | null {
  */
 export function isTokenExpired(token: string): boolean {
   const payload = decodeJwt(token);
-  
+
   if (!payload || !payload.exp) {
     return true; // Consider invalid tokens as expired
   }
-  
+
   // exp is in seconds, Date.now() is in milliseconds
   const expirationTime = payload.exp * 1000;
   return Date.now() >= expirationTime;
@@ -77,14 +77,14 @@ export function isTokenExpired(token: string): boolean {
  */
 export function getTokenExpirationTime(token: string): number {
   const payload = decodeJwt(token);
-  
+
   if (!payload || !payload.exp) {
     return 0;
   }
-  
+
   const expirationTime = payload.exp * 1000;
   const timeRemaining = expirationTime - Date.now();
-  
+
   return Math.max(0, timeRemaining);
 }
 

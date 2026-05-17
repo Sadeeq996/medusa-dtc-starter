@@ -1,8 +1,8 @@
-# 🛒 FreshCart - Modern E-Commerce Platform
+# 🛒 Medusa - Modern E-Commerce Platform
 
 <div align="center">
 
-<img src="https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Shopping%20cart/3D/shopping_cart_3d.png" width="120" alt="FreshCart Icon"/>
+<img src="https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Shopping%20cart/3D/shopping_cart_3d.png" width="120" alt="Medusa Icon"/>
 
 **Full-Stack Angular E-Commerce Application**
 
@@ -18,9 +18,9 @@
 
 ## 📌 Overview
 
-**FreshCart** is a production-ready e-commerce platform built with **Angular 20**, **PrimeNG**, and **Tailwind CSS**. The application delivers a complete shopping experience—from browsing products and managing wishlists to secure checkout with multiple payment methods—while showcasing enterprise-grade Angular development patterns including signal-based state management, comprehensive i18n with RTL support, dynamic theming, and optimized performance architecture.
+**Medusa** is a production-ready e-commerce platform built with **Angular 20**, **PrimeNG**, and **Tailwind CSS**. The application delivers a complete shopping experience—from browsing products and managing wishlists to secure checkout with multiple payment methods—while showcasing enterprise-grade Angular development patterns including signal-based state management, comprehensive i18n with RTL support, dynamic theming, and optimized performance architecture.
 
-Developed as the **final project** for [Route Academy](https://www.linkedin.com/company/routeacademy/)'s Frontend Angular Developer course, FreshCart demonstrates real-world e-commerce functionality through standalone components, reactive programming, and a scalable feature-based architecture designed for production environments.
+Developed as the **final project** for [Route Academy](https://www.linkedin.com/company/routeacademy/)'s Frontend Angular Developer course, Medusa demonstrates real-world e-commerce functionality through standalone components, reactive programming, and a scalable feature-based architecture designed for production environments.
 
 <div align="center">
   <a href="https://angular-ecommerce-v0.vercel.app/" target="_blank">
@@ -33,7 +33,7 @@ Developed as the **final project** for [Route Academy](https://www.linkedin.com/
 ## 💫 Interface Preview
 
 <div align="center">
-  <img src="Docs/ui-screenshots/Hero.png" alt="FreshCart - Modern E-Commerce Platform">
+  <img src="Docs/ui-screenshots/Hero.png" alt="Medusa - Modern E-Commerce Platform">
   <a href="Docs/ui-screenshots">
     <img src="https://img.shields.io/badge/View_All_Screenshots-4285F4?style=for-the-badge&logo=instagram&logoColor=white" alt="View All Screenshots" />
   </a>
@@ -119,6 +119,21 @@ Developed as the **final project** for [Route Academy](https://www.linkedin.com/
 
 ---
 
+## 🔌 Medusa Integration Status
+
+- Angular app is located in `apps/ngfront`
+- Local API URL is configured to `http://localhost:9000/store`
+- The current app is still using Route-style `/api/v1` service patterns, so it needs further endpoint mapping to Medusa store routes for full compatibility
+- Next integration steps:
+  1. Remap frontend API endpoints to Medusa `/store` endpoints
+  2. Adapt authentication and cart/checkout flows to Medusa store auth
+  3. Add vendor storefront/admin UI for the custom marketplace module
+  4. 
+1. You can start the Angular frontend with:
+pnpm ngfront:dev
+
+---
+
 ## 🎨 Theme System
 
 - 🎨 **4 Custom PrimeNG Presets:** Fresh (Teal) • Premium (Indigo) • Vibrant (Orange) • Natural (Emerald)
@@ -142,7 +157,7 @@ Developed as the **final project** for [Route Academy](https://www.linkedin.com/
 ## 🏗️ Project Structure
 
 ```
-📦 FreshCart
+📦 Medusa
  ┣ 📂 src
  ┃ ┣ 📂 app
  ┃ ┃ ┣ 📂 core                    # Core functionality

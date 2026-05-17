@@ -12,11 +12,11 @@ export class I18nService {
   private readonly translateService = inject(TranslateService);
   private readonly primeNGConfig = inject(PrimeNG);
   private readonly storageService = inject(StorageService);
-  
+
   // ✅ Single source of truth for current language (reactive signal)
   readonly currentLanguage = signal<string>('en');
-  
-  // Supported languages for FreshCart
+
+  // Supported languages for Sellpadi
   readonly supportedLanguages = [
     { code: 'en', name: 'English', direction: 'ltr' },
     { code: 'ar', name: 'العربية', direction: 'rtl' }
@@ -33,16 +33,16 @@ export class I18nService {
   private initializeTranslations(): void {
     // Set supported languages
     this.translateService.addLangs(this.supportedLanguages.map(lang => lang.code));
-    
+
     // Set default language (fallback)
     this.translateService.setDefaultLang('en');
-    
+
     // Determine initial language with priority order
     const savedLang = this.storageService.getLanguage(); // 1️⃣ Check localStorage first
     const browserLang = this.translateService.getBrowserLang(); // 2️⃣ Check browser language
-    
+
     let initialLang = 'en'; // 3️⃣ Default fallback
-    
+
     // Priority 1: Use saved language preference if valid
     if (savedLang && this.supportedLanguages.some(lang => lang.code === savedLang)) {
       initialLang = savedLang;
@@ -51,7 +51,7 @@ export class I18nService {
     else if (browserLang && this.supportedLanguages.some(lang => lang.code === browserLang)) {
       initialLang = browserLang;
     }
-    
+
     // Apply the determined language
     this.setLanguage(initialLang);
   }
@@ -63,13 +63,13 @@ export class I18nService {
     if (this.supportedLanguages.some(lang => lang.code === langCode)) {
       // ✅ Update reactive signal (single source of truth)
       this.currentLanguage.set(langCode);
-      
+
       // Apply language to ngx-translate
       this.translateService.use(langCode);
-      
+
       // 💾 Persist language preference to localStorage
       this.storageService.setLanguage(langCode);
-      
+
       // Sync PrimeNG translations dynamically
       // ✅ Using take(1) to auto-unsubscribe after first emission (prevents memory leaks)
       this.translateService.get('PRIMENG')
@@ -79,7 +79,7 @@ export class I18nService {
             this.primeNGConfig.setTranslation(translations);
           }
         });
-      
+
       // Update document direction for RTL support
       const language = this.supportedLanguages.find(lang => lang.code === langCode);
       if (language) {

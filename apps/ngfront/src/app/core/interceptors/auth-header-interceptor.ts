@@ -6,13 +6,13 @@ import { HEADERS } from '../constants/api-endpoints.const';
 /**
  * Authentication Header Interceptor
  * Automatically adds authentication token to all API requests
- * Based on Route E-commerce API requirements (custom 'token' header)
+ * Uses standard Authorization Bearer tokens for Medusa store routes
  */
 export const authHeaderInterceptor: HttpInterceptorFn = (req, next) => {
   const storage = inject(StorageService);
 
   // Skip authentication for auth endpoints (login, register, forgot-password)
-  const authEndpoints = ['/auth/signin', '/auth/signup', '/auth/forgotPasswords', '/auth/verifyResetCode', '/auth/resetPassword'];
+  const authEndpoints = ['/auth', '/customers', '/customers/password-reset', '/customers/password-reset/verify'];
   const isAuthEndpoint = authEndpoints.some(endpoint => req.url.includes(endpoint));
 
   // Skip authentication if this is an auth endpoint
@@ -22,13 +22,14 @@ export const authHeaderInterceptor: HttpInterceptorFn = (req, next) => {
 
   // Get token from storage
   const token = storage.getToken();
-  
-  // Add token header if user is authenticated
+
+  // Add Authorization header if user is authenticated
   if (token) {
     const authReq = req.clone({
       setHeaders: {
-        [HEADERS.TOKEN]: token
-      }
+        [HEADERS.AUTHORIZATION]: `Bearer ${token}`
+      },
+      withCredentials: true
     });
     return next(authReq);
   }

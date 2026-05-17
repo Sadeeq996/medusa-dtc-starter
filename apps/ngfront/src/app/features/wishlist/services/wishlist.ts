@@ -7,9 +7,9 @@ import { StorageService } from '../../../core/services/storage';
 import { AuthService } from '../../auth/services/auth';
 import { WISHLIST_ENDPOINTS } from '../../../core/constants/api-endpoints.const';
 import { extractErrorMessage } from '../../../shared/utils/error.utils';
-import { 
+import {
   WishlistApiResponse,
-  AddToWishlistRequest, 
+  AddToWishlistRequest,
   RemoveFromWishlistRequest,
   WishlistPersistenceData,
   WishlistOperationResult
@@ -35,8 +35,8 @@ export class WishlistService {
   private readonly authService = inject(AuthService);
 
   // LocalStorage key for wishlist persistence
-  private readonly WISHLIST_STORAGE_KEY = 'freshcart_wishlist';
-  
+  private readonly WISHLIST_STORAGE_KEY = 'Sellpadi_wishlist';
+
   // Wishlist expiration configuration
   private readonly WISHLIST_MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000; // 30 days (longer than cart)
 
@@ -161,7 +161,7 @@ export class WishlistService {
         })
       )
     );
-    
+
     // Execute all POST operations, then GET final wishlist
     return this.executeSequentially(addOperations).pipe(
       switchMap(() => this.getWishlist()),
@@ -172,9 +172,9 @@ export class WishlistService {
       })),
       catchError(error => {
         console.error('Wishlist sync error:', error);
-        return of({ 
-          success: false, 
-          message: 'Failed to sync wishlist with server' 
+        return of({
+          success: false,
+          message: 'Failed to sync wishlist with server'
         });
       })
     );
@@ -193,7 +193,7 @@ export class WishlistService {
         lastUpdated: Date.now(),
         userId: this.authService.getCurrentUserId()
       };
-      
+
       this.storage.setItem(this.WISHLIST_STORAGE_KEY, JSON.stringify(wishlistData));
     } catch (error) {
       console.error('Failed to save wishlist to storage:', error);
@@ -212,7 +212,7 @@ export class WishlistService {
       try {
         const wishlistData: WishlistPersistenceData = JSON.parse(wishlistDataStr);
         if (!wishlistData || typeof wishlistData !== 'object') return [];
-        
+
         // Check if wishlist belongs to current user (if authenticated)
         const currentUserId = this.authService.getCurrentUserId();
         if (currentUserId && wishlistData.userId && wishlistData.userId !== currentUserId) {

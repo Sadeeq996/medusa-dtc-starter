@@ -16,16 +16,16 @@ import { TranslateModule } from '@ngx-translate/core';
 
 import { AuthService } from '../../services/auth';
 import { RegisterRequest } from '../../../../core/models/user.model';
-import { 
-  passwordMatchValidator, 
-  egyptianPhoneValidator, 
-  strongPasswordValidator 
+import {
+  passwordMatchValidator,
+  egyptianPhoneValidator,
+  strongPasswordValidator
 } from '../../../../shared/validators/form-validation.util';
 
 /**
  * Register Component
  * User registration form with validation
- * Based on FreshCart BRD requirements and API specifications
+ * Based on Sellpadi BRD requirements and API specifications
  */
 @Component({
   selector: 'app-register',
@@ -91,7 +91,7 @@ export class RegisterComponent {
       rePassword: ['', [
         Validators.required
       ]]
-    }, { 
+    }, {
       validators: passwordMatchValidator()
     });
   }
@@ -129,7 +129,7 @@ export class RegisterComponent {
       next: (response) => {
         this.isLoading.set(false);
         this.successMessage.set('Account created successfully! Redirecting...');
-        
+
         // Redirect after short delay
         setTimeout(() => {
           const returnUrl = this.route.snapshot.queryParams['returnUrl'];

@@ -26,6 +26,11 @@ export const routes: Routes = [
     path: 'brands',
     loadChildren: () => import('./features/brands/brands.routes').then(m => m.brandsRoutes)
   },
+  // Marketplace feature routes - Vendor storefronts and admin dashboard
+  {
+    path: 'marketplace',
+    loadChildren: () => import('./features/marketplace/marketplace.routes').then(m => m.marketplaceRoutes)
+  },
   // Wishlist feature routes - User Wishlist
   {
     path: 'wishlist',

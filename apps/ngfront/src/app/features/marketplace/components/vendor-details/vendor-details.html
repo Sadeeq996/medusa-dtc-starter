@@ -1,0 +1,47 @@
+<section class="vendor-details">
+    <div class="max-w-4xl mx-auto px-4 py-8">
+        @if (loading) {
+        <div class="rounded-3xl border border-surface bg-white p-8 shadow-sm">
+            <p class="text-sm text-muted-color">Loading vendor details...</p>
+        </div>
+        } @else if (!vendor) {
+        <div class="rounded-3xl border border-surface bg-white p-8 shadow-sm">
+            <h1 class="text-2xl font-semibold text-color">Vendor Not Found</h1>
+            <p class="text-sm text-muted-color mt-2">The requested vendor storefront is not available yet.</p>
+        </div>
+        } @else {
+        <div class="rounded-3xl border border-surface bg-white p-8 shadow-sm">
+            <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-8">
+                <div class="flex items-center gap-4">
+                    <div class="h-20 w-20 rounded-3xl overflow-hidden bg-surface flex items-center justify-center">
+                        <img src="{{ vendor.logo }}" alt="{{ vendor.name }} logo" class="h-full w-full object-cover" />
+                    </div>
+                    <div>
+                        <h1 class="text-3xl font-semibold text-color">{{ vendor.name }}</h1>
+                        <p class="text-sm text-muted-color">{{ vendor.productCount }} products available</p>
+                    </div>
+                </div>
+                <div class="flex flex-wrap gap-2">
+                    <p-button label="Browse products" icon="pi pi-shopping" severity="primary"></p-button>
+                    <p-button label="All vendors" icon="pi pi-angle-left" severity="secondary"
+                        routerLink="/marketplace/vendors"></p-button>
+                </div>
+            </div>
+
+            <p class="text-sm text-muted-color leading-7">{{ vendor.description }}</p>
+
+            <div class="mt-8 grid gap-4 sm:grid-cols-2">
+                <div class="rounded-3xl border border-surface p-6 bg-surface">
+                    <h2 class="text-lg font-semibold text-color mb-2">Vendor Rating</h2>
+                    <p class="text-sm text-muted-color">{{ vendor.rating }} / 5.0</p>
+                </div>
+                <div class="rounded-3xl border border-surface p-6 bg-surface">
+                    <h2 class="text-lg font-semibold text-color mb-2">Storefront Info</h2>
+                    <p class="text-sm text-muted-color">Handle: {{ vendor.handle }}</p>
+                    <p class="text-sm text-muted-color">Vendor ID: {{ vendor.id }}</p>
+                </div>
+            </div>
+        </div>
+        }
+    </div>
+</section>

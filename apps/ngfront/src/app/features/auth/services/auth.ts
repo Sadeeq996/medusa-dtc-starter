@@ -4,7 +4,7 @@ import { Router } from '@angular/router';
 
 import { ApiService } from '../../../core/services/api';
 import { StorageService } from '../../../core/services/storage';
-import { AUTH_ENDPOINTS } from '../../../core/constants/api-endpoints.const';
+import { AUTH_ENDPOINTS, USER_ENDPOINTS } from '../../../core/constants/api-endpoints.const';
 import {
   LoginCredentials,
   RegisterRequest,
@@ -47,7 +47,7 @@ export class AuthService {
   private initializeAuthState(): void {
     const userData = this.storage.getUserData();
     const isAuth = this.storage.isAuthenticated();
-    
+
     if (userData && isAuth) {
       this._currentUser.next(userData);
       this._isAuthenticated.next(true);
@@ -58,7 +58,7 @@ export class AuthService {
 
   /**
    * Register new user
-   * API: POST /auth/signup
+   * API: POST /customers
    */
   register(registerData: RegisterRequest): Observable<AuthResponse> {
     return this.api.post<AuthResponse>(AUTH_ENDPOINTS.SIGNUP, registerData, { requiresAuth: false })
@@ -75,7 +75,7 @@ export class AuthService {
 
   /**
    * Login user
-   * API: POST /auth/signin
+   * API: POST /auth
    */
   login(credentials: LoginCredentials): Observable<AuthResponse> {
     return this.api.post<AuthResponse>(AUTH_ENDPOINTS.SIGNIN, credentials, { requiresAuth: false })
@@ -98,7 +98,7 @@ export class AuthService {
     this.storage.logout();
     this._currentUser.next(null);
     this._isAuthenticated.next(false);
-    
+
     // Redirect to home page
     this.router.navigate(['/']);
   }
@@ -107,15 +107,15 @@ export class AuthService {
 
   /**
    * Send password reset email
-   * API: POST /auth/forgotPasswords
+   * API: POST /customers/password-reset
    */
   forgotPassword(email: PasswordResetRequest): Observable<any> {
     return this.api.post(AUTH_ENDPOINTS.FORGOT_PASSWORD, email, { requiresAuth: false });
   }
 
   /**
-   * Verify reset code
-   * API: POST /auth/verifyResetCode
+   * Verify password reset code
+   * API: POST /customers/password-reset/verify
    */
   verifyResetCode(resetCode: ResetCodeVerification): Observable<any> {
     return this.api.post(AUTH_ENDPOINTS.VERIFY_RESET_CODE, resetCode, { requiresAuth: false });
@@ -123,7 +123,7 @@ export class AuthService {
 
   /**
    * Reset password
-   * API: PUT /auth/resetPassword
+   * API: PUT /customers/password-reset
    */
   resetPassword(passwordData: PasswordReset): Observable<AuthResponse> {
     return this.api.put<AuthResponse>(AUTH_ENDPOINTS.RESET_PASSWORD, passwordData, { requiresAuth: false })
@@ -136,10 +136,10 @@ export class AuthService {
 
   /**
    * Change user password
-   * API: PUT /users/changeMyPassword
+   * API: PUT /customers/password
    */
   changePassword(passwordData: ChangePasswordRequest): Observable<AuthResponse> {
-    return this.api.put<AuthResponse>('/users/changeMyPassword', passwordData)
+    return this.api.put<AuthResponse>(USER_ENDPOINTS.CHANGE_PASSWORD, passwordData)
       .pipe(
         tap(response => {
           // Update token after password change
@@ -150,10 +150,10 @@ export class AuthService {
 
   /**
    * Update user profile
-   * API: PUT /users/updateMe
+   * API: PUT /customers/me
    */
   updateProfile(profileData: UpdateProfileRequest): Observable<{ message: string; user: User }> {
-    return this.api.put<{ message: string; user: User }>('/users/updateMe', profileData)
+    return this.api.put<{ message: string; user: User }>(USER_ENDPOINTS.UPDATE_PROFILE, profileData)
       .pipe(
         tap(response => {
           // Update stored user data
@@ -179,7 +179,7 @@ export class AuthService {
   private handleAuthSuccess(response: AuthResponse): void {
     // Store token and user data
     this.storage.setToken(response.token);
-    
+
     // Create user object with available data from response
     const userData: User = {
       name: response.user.name,
@@ -188,7 +188,7 @@ export class AuthService {
       // Note: _id and phone are not provided in auth response
       // They will be available when fetching full user profile
     };
-    
+
     this.storage.setUserData(userData);
 
     // Update reactive state

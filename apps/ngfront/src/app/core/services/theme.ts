@@ -30,7 +30,7 @@ export interface ThemePresetConfig {
 
 /**
  * Available Theme Presets with Metadata
- * Production-ready themes for FreshCart
+ * Production-ready themes for Sellpadi
  */
 export const THEME_PRESETS: ThemePresetConfig[] = [
   {
@@ -97,8 +97,8 @@ export class ThemeService {
   readonly isDarkMode = computed(() => this.currentTheme() === 'dark');
 
   // Get current preset configuration with safe fallback
-  readonly currentPresetConfig = computed(() => 
-    THEME_PRESETS.find(p => p.value === this.currentPreset()) || 
+  readonly currentPresetConfig = computed(() =>
+    THEME_PRESETS.find(p => p.value === this.currentPreset()) ||
     THEME_PRESETS.find(p => p.value === DEFAULT_THEME_PRESET) ||
     THEME_PRESETS[0] // Final fallback to first theme
   );
@@ -106,7 +106,7 @@ export class ThemeService {
   constructor() {
     // Initialize theme preset from storage first
     this.initializePreset();
-    
+
     // Initialize theme mode from storage or system preference
     this.initializeTheme();
 
@@ -127,7 +127,7 @@ export class ThemeService {
    */
   private initializePreset(): void {
     const savedPreset = this.storage.getItem<ThemePreset>(THEME_PRESET_STORAGE_KEY);
-    
+
     if (savedPreset && this.isValidPreset(savedPreset)) {
       // Just update the signal - preset already applied in app.config.ts
       this.currentPreset.set(savedPreset);
@@ -143,7 +143,7 @@ export class ThemeService {
   private initializeTheme(): void {
     // Try to get saved theme from storage
     const savedTheme = this.storage.getTheme() as ThemeMode | null;
-    
+
     if (savedTheme) {
       this.currentTheme.set(savedTheme);
     } else {
@@ -159,7 +159,7 @@ export class ThemeService {
    */
   private applyTheme(theme: ThemeMode): void {
     const element = document.documentElement;
-    
+
     if (theme === 'dark') {
       element.classList.add(this.DARK_MODE_CLASS);
     } else {
@@ -179,7 +179,7 @@ export class ThemeService {
    */
   private applyPreset(preset: ThemePreset): void {
     const presetConfig = THEME_PRESETS.find(p => p.value === preset);
-    
+
     if (presetConfig) {
       // Use PrimeNG's usePreset utility to change theme dynamically
       usePreset(presetConfig.preset);

@@ -1,7 +1,7 @@
 {
   "COMMON": {
-    "APP_NAME": "FreshCart",
-    "WELCOME": "Welcome to FreshCart",
+    "APP_NAME": "Medusa",
+    "WELCOME": "Welcome to Medusa",
     "LOADING": "Loading...",
     "ERROR": "Something went wrong",
     "SUCCESS": "Success!",
@@ -23,6 +23,7 @@
     "PRODUCTS": "Products",
     "CATEGORIES": "Categories",
     "BRANDS": "Brands",
+    "MARKETPLACE": "Marketplace",
     "CART": "Cart",
     "WISHLIST": "Wishlist",
     "PROFILE": "Profile",
@@ -474,7 +475,7 @@
     }
   },
   "FOOTER": {
-    "GET_APP": "Get the FreshCart app",
+    "GET_APP": "Get the Medusa app",
     "EMAIL_PLACEHOLDER": "Enter your email",
     "SUBSCRIBE": "Subscribe",
     "PAYMENT_PARTNERS": "We accept",
@@ -482,8 +483,8 @@
     "APP_STORE": "Download on App Store",
     "GOOGLE_PLAY": "Get it on Google Play",
     "SOCIAL_FOLLOW": "Follow us",
-    "DELIVERY_INFO": "Get deliveries with FreshCart",
-    "COPYRIGHT": "© 2025 FreshCart. All rights reserved."
+    "DELIVERY_INFO": "Get deliveries with Medusa",
+    "COPYRIGHT": "© 2025 Medusa. All rights reserved."
   },
   "PRIMENG": {
     "startsWith": "Starts with",
@@ -616,7 +617,7 @@
     "ARIA_LOGOUT": "Logout from your account",
     "LOGIN": {
       "TITLE": "Sign In to Your Account",
-      "SUBTITLE": "Welcome back to FreshCart",
+      "SUBTITLE": "Welcome back to Medusa",
       "EMAIL": "Email Address",
       "EMAIL_PLACEHOLDER": "Enter your email address",
       "PASSWORD": "Password",
@@ -634,7 +635,7 @@
     },
     "REGISTER": {
       "TITLE": "Create Your Account",
-      "SUBTITLE": "Join FreshCart and start shopping today",
+      "SUBTITLE": "Join Medusa and start shopping today",
       "FULL_NAME": "Full Name",
       "FULL_NAME_PLACEHOLDER": "Enter your full name",
       "EMAIL": "Email Address",

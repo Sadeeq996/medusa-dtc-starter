@@ -12,10 +12,10 @@ export const PROFILE_ROUTES: Routes = [
     canActivate: [authGuard],
     loadComponent: () =>
       import('./components/profile-dashboard/profile-dashboard').then((m) => m.ProfileDashboardPage),
-    title: 'My Profile - FreshCart',
+    title: 'My Profile - Sellpadi',
     data: {
       description: 'View your profile, orders, and account information',
-      keywords: 'profile, account, dashboard, FreshCart'
+      keywords: 'profile, account, dashboard, Sellpadi'
     }
   },
   // Orders - Order history and details
@@ -24,10 +24,10 @@ export const PROFILE_ROUTES: Routes = [
     canActivate: [authGuard],
     loadComponent: () =>
       import('./components/orders-page/orders-page').then((m) => m.OrdersPage),
-    title: 'My Orders - FreshCart',
+    title: 'My Orders - Sellpadi',
     data: {
       description: 'View your order history and track shipments',
-      keywords: 'orders, order history, tracking, FreshCart'
+      keywords: 'orders, order history, tracking, Sellpadi'
     }
   },
   {
@@ -37,10 +37,10 @@ export const PROFILE_ROUTES: Routes = [
       import('./components/order-details-page/order-details-page').then(
         (m) => m.OrderDetailsPage
       ),
-    title: 'Order Details - FreshCart',
+    title: 'Order Details - Sellpadi',
     data: {
       description: 'View detailed information about your order',
-      keywords: 'order details, order tracking, FreshCart'
+      keywords: 'order details, order tracking, Sellpadi'
     }
   },
   // Addresses - Address management
@@ -51,10 +51,10 @@ export const PROFILE_ROUTES: Routes = [
       import('./components/addresses-page/addresses-page').then(
         (m) => m.AddressesPage
       ),
-    title: 'My Addresses - FreshCart',
+    title: 'My Addresses - Sellpadi',
     data: {
       description: 'Manage your shipping and billing addresses',
-      keywords: 'addresses, shipping address, billing address, FreshCart'
+      keywords: 'addresses, shipping address, billing address, Sellpadi'
     }
   },
   // Settings - Account settings and profile editing
@@ -63,10 +63,10 @@ export const PROFILE_ROUTES: Routes = [
     canActivate: [authGuard],
     loadComponent: () =>
       import('./components/settings-page/settings-page').then((m) => m.SettingsPage),
-    title: 'Account Settings - FreshCart',
+    title: 'Account Settings - Sellpadi',
     data: {
       description: 'Update your account information and password',
-      keywords: 'settings, account settings, profile edit, FreshCart'
+      keywords: 'settings, account settings, profile edit, Sellpadi'
     }
   }
 ];

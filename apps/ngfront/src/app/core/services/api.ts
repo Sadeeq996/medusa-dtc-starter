@@ -5,10 +5,10 @@ import { catchError, retry, timeout } from 'rxjs/operators';
 
 import { environment } from '../../../environments/environment';
 import { StorageService } from './storage';
-import { 
-  CollectionResponse, 
-  SingleItemResponse, 
-  ApiError, 
+import {
+  CollectionResponse,
+  SingleItemResponse,
+  ApiError,
   ApiRequestOptions,
   CollectionQueryParams
 } from '../models/api-response.model';
@@ -16,8 +16,8 @@ import { HEADERS, API_CONFIG } from '../constants/api-endpoints.const';
 
 /**
  * API Service
- * Centralized HTTP client for FreshCart API
- * Based on real API testing with Route E-commerce backend
+ * Centralized HTTP client for Sellpadi Store API
+ * Handles request headers, query params, and error normalization
  */
 @Injectable({
   providedIn: 'root'
@@ -38,7 +38,7 @@ export class ApiService {
   getCollection<T>(endpoint: string, params?: CollectionQueryParams, options?: ApiRequestOptions): Observable<CollectionResponse<T>> {
     const httpOptions = this.buildHttpOptions(options, params);
     const url = `${this.baseUrl}${endpoint}`;
-    
+
     return this.http.get<CollectionResponse<T>>(url, httpOptions)
       .pipe(
         timeout(this.COLLECTION_TIMEOUT),
@@ -53,7 +53,7 @@ export class ApiService {
   getItem<T>(endpoint: string, options?: ApiRequestOptions): Observable<SingleItemResponse<T>> {
     const httpOptions = this.buildHttpOptions(options);
     const url = `${this.baseUrl}${endpoint}`;
-    
+
     return this.http.get<SingleItemResponse<T>>(url, httpOptions)
       .pipe(
         retry(1),
@@ -67,7 +67,7 @@ export class ApiService {
   get<T>(endpoint: string, params?: any, options?: ApiRequestOptions): Observable<T> {
     const httpOptions = this.buildHttpOptions(options, params);
     const url = `${this.baseUrl}${endpoint}`;
-    
+
     return this.http.get<T>(url, httpOptions)
       .pipe(
         retry(1),
@@ -81,7 +81,7 @@ export class ApiService {
   post<T>(endpoint: string, data: any, options?: ApiRequestOptions): Observable<T> {
     const httpOptions = this.buildHttpOptions(options);
     const url = `${this.baseUrl}${endpoint}`;
-    
+
     return this.http.post<T>(url, data, httpOptions)
       .pipe(
         catchError(this.handleError.bind(this))
@@ -94,7 +94,7 @@ export class ApiService {
   put<T>(endpoint: string, data: any, options?: ApiRequestOptions): Observable<T> {
     const httpOptions = this.buildHttpOptions(options);
     const url = `${this.baseUrl}${endpoint}`;
-    
+
     return this.http.put<T>(url, data, httpOptions)
       .pipe(
         catchError(this.handleError.bind(this))
@@ -107,7 +107,7 @@ export class ApiService {
   delete<T>(endpoint: string, options?: ApiRequestOptions): Observable<T> {
     const httpOptions = this.buildHttpOptions(options);
     const url = `${this.baseUrl}${endpoint}`;
-    
+
     return this.http.delete<T>(url, httpOptions)
       .pipe(
         catchError(this.handleError.bind(this))
@@ -116,9 +116,9 @@ export class ApiService {
 
   /**
    * Build HTTP options with headers, params, and authentication
-   * Based on real API testing: uses custom 'token' header
+   * Uses JSON headers by default; auth header is injected by authHeaderInterceptor
    */
-  private buildHttpOptions(options?: ApiRequestOptions, queryParams?: any): { headers: HttpHeaders; params?: HttpParams } {
+  private buildHttpOptions(options?: ApiRequestOptions, queryParams?: any): { headers: HttpHeaders; params?: HttpParams; withCredentials: boolean } {
     let headers = new HttpHeaders({
       [HEADERS.CONTENT_TYPE]: HEADERS.APPLICATION_JSON
     });
@@ -164,7 +164,8 @@ export class ApiService {
 
     return {
       headers,
-      ...(params.keys().length > 0 && { params })
+      ...(params.keys().length > 0 && { params }),
+      withCredentials: true
     };
   }
 
@@ -175,7 +176,7 @@ export class ApiService {
   private handleError(error: HttpErrorResponse): Observable<never> {
     let errorMessage = 'An unknown error occurred';
     let statusCode = error.status;
-    
+
     // Handle different error scenarios
     if (error.error) {
       // API Error Response Format: { statusMsg: "fail", message: "..." }
@@ -228,13 +229,13 @@ export class ApiService {
    */
   buildCollectionParams(params: CollectionQueryParams): any {
     const queryParams: any = {};
-    
+
     if (params.limit) queryParams.limit = params.limit;
     if (params.page) queryParams.page = params.page;
     if (params.sort) queryParams.sort = params.sort;
     if (params.keyword) queryParams.keyword = params.keyword;
     if (params.fields) queryParams.fields = params.fields;
-    
+
     return queryParams;
   }
 
@@ -243,13 +244,13 @@ export class ApiService {
    */
   buildUrl(endpoint: string, params?: { [key: string]: string | number }): string {
     let url = `${this.baseUrl}${endpoint}`;
-    
+
     if (params) {
       Object.keys(params).forEach(key => {
         url = url.replace(`{${key}}`, params[key].toString());
       });
     }
-    
+
     return url;
   }
 }

@@ -27,7 +27,7 @@ export class ProfileService {
 
   /**
    * Update user profile
-   * API: PUT /api/v1/users/updateMe
+   * API: PUT /customers/me
    * @param profileData - Updated profile data
    * @returns Observable of updated user
    */

@@ -14,28 +14,28 @@ export const productsRoutes: Routes = [
   {
     path: 'list',
     loadComponent: () => import('./components/product-list/product-list').then(m => m.ProductListComponent),
-    title: 'Products - FreshCart',
-    data: { 
-      description: 'Browse all products on FreshCart',
-      keywords: 'products, shopping, e-commerce, FreshCart' 
+    title: 'Products - Sellpadi',
+    data: {
+      description: 'Browse all products on Sellpadi',
+      keywords: 'products, shopping, e-commerce, Sellpadi'
     }
   },
   {
     path: 'search',
     loadComponent: () => import('./components/product-search/product-search').then(m => m.ProductSearchComponent),
-    title: 'Search Products - FreshCart',
-    data: { 
-      description: 'Search for products on FreshCart',
-      keywords: 'search, find products, product search, FreshCart' 
+    title: 'Search Products - Sellpadi',
+    data: {
+      description: 'Search for products on Sellpadi',
+      keywords: 'search, find products, product search, Sellpadi'
     }
   },
   {
     path: ':id',
     loadComponent: () => import('./components/product-details/product-details').then(m => m.ProductDetailsComponent),
-    title: 'Product Details - FreshCart',
-    data: { 
+    title: 'Product Details - Sellpadi',
+    data: {
       description: 'View product details and specifications',
-      keywords: 'product details, specifications, buy product, FreshCart' 
+      keywords: 'product details, specifications, buy product, Sellpadi'
     }
   }
 ];

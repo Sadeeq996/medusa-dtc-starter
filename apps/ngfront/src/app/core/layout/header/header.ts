@@ -36,34 +36,34 @@ export class Header implements OnInit, OnDestroy {
   private readonly wishlistStore = inject(WishlistStore);
   private translationSubscription?: Subscription;
   private authSubscription?: Subscription;
-  
+
   readonly drawerVisible = signal(false);
-  
+
   readonly isAuthenticated = toSignal(this.authService.isAuthenticated$, { initialValue: false });
   readonly currentUser = toSignal(this.authService.currentUser$, { initialValue: null });
   readonly currentUserName = computed(() => this.currentUser()?.name ?? null);
-  
+
   readonly currentLanguage = this.i18nService.currentLanguage;
   readonly isDarkMode = this.themeService.isDarkMode;
-  
+
   // Badge counts for Cart and Wishlist
   readonly cartBadgeCount = computed(() => this.cartStore.badgeCount());
   readonly wishlistBadgeCount = computed(() => this.wishlistStore.badgeCount());
-  
+
   // Theme preset management
   readonly availableThemePresets = THEME_PRESETS;
   readonly currentThemePreset = this.themeService.currentPreset;
   readonly currentPresetConfig = this.themeService.currentPresetConfig;
-  
+
   // Theme preset menu items for mobile
-  readonly themePresetMenuItems = computed<MenuItem[]>(() => 
+  readonly themePresetMenuItems = computed<MenuItem[]>(() =>
     this.availableThemePresets.map(preset => ({
       label: preset.name,
       icon: preset.icon,
       command: () => this.onThemePresetChange(preset.value)
     }))
   );
-  
+
   // ✅ MINIMAL CHANGE: Only the parts that need reactivity
   // Store translations in a signal for reactive menu items
   private readonly translationStrings = signal({
@@ -71,6 +71,7 @@ export class Header implements OnInit, OnDestroy {
     products: '',
     categories: '',
     brands: '',
+    marketplace: '',
     cart: '',
     wishlist: '',
     orders: '',
@@ -79,7 +80,7 @@ export class Header implements OnInit, OnDestroy {
     settings: '',
     logout: ''
   });
-  
+
   // ✅ REFACTORED: Extract common menu items to reduce duplication
   // Returns readonly array to prevent accidental mutations
   private getBaseMenuItems(t: ReturnType<typeof this.translationStrings>): readonly MenuItem[] {
@@ -103,18 +104,23 @@ export class Header implements OnInit, OnDestroy {
         label: t.brands,
         icon: PrimeIcons.BOOKMARK,
         routerLink: '/brands'
+      },
+      {
+        label: t.marketplace,
+        icon: PrimeIcons.BRIEFCASE,
+        routerLink: '/marketplace/vendors'
       }
     ];
   }
-  
+
   // ✅ Desktop menu items (Cart & Wishlist moved to action buttons)
   readonly menuItems = computed<MenuItem[]>(() => {
     const t = this.translationStrings();
     const authenticated = this.isAuthenticated();
-    
+
     // Clone base items to maintain immutability
     const items = [...this.getBaseMenuItems(t)];
-    
+
     // Add Orders as direct link for authenticated users
     if (authenticated) {
       items.push({
@@ -123,18 +129,18 @@ export class Header implements OnInit, OnDestroy {
         routerLink: '/profile/orders'
       });
     }
-    
+
     return items;
   });
-  
+
   // ✅ Mobile drawer menu items (includes Cart & Wishlist)
   readonly mobileMenuItems = computed<MenuItem[]>(() => {
     const t = this.translationStrings();
     const authenticated = this.isAuthenticated();
-    
+
     // Clone base items to maintain immutability
     const items = [...this.getBaseMenuItems(t)];
-    
+
     // Add Cart & Wishlist for mobile (using computed badge counts)
     items.push(
       {
@@ -150,7 +156,7 @@ export class Header implements OnInit, OnDestroy {
         badge: this.cartBadgeCount()
       }
     );
-    
+
     // Add Orders for authenticated users
     if (authenticated) {
       items.push({
@@ -159,7 +165,7 @@ export class Header implements OnInit, OnDestroy {
         routerLink: '/profile/orders'
       });
     }
-    
+
     return items;
   });
 
@@ -167,7 +173,7 @@ export class Header implements OnInit, OnDestroy {
   // Note: Orders is in main menu, not in dropdown
   readonly userMenuItems = computed<MenuItem[]>(() => {
     const t = this.translationStrings();
-    
+
     return [
       {
         label: t.viewProfile,
@@ -204,7 +210,7 @@ export class Header implements OnInit, OnDestroy {
       this.cartStore.onAuthenticationChange(isAuthenticated);
       this.wishlistStore.onAuthenticationChange(isAuthenticated);
     });
-    
+
     // ✅ Keep translation observable - it works fine and changes rarely
     // Only update the signal when translations change
     this.translationSubscription = combineLatest([
@@ -212,6 +218,7 @@ export class Header implements OnInit, OnDestroy {
       this.translateService.stream('NAVIGATION.PRODUCTS'),
       this.translateService.stream('NAVIGATION.CATEGORIES'),
       this.translateService.stream('NAVIGATION.BRANDS'),
+      this.translateService.stream('NAVIGATION.MARKETPLACE'),
       this.translateService.stream('NAVIGATION.CART'),
       this.translateService.stream('NAVIGATION.WISHLIST'),
       this.translateService.stream('NAVIGATION.ORDERS'),
@@ -219,9 +226,9 @@ export class Header implements OnInit, OnDestroy {
       this.translateService.stream('NAVIGATION.ADDRESSES'),
       this.translateService.stream('NAVIGATION.SETTINGS'),
       this.translateService.stream('NAVIGATION.LOGOUT')
-    ]).subscribe(([home, products, categories, brands, cart, wishlist, orders, viewProfile, addresses, settings, logout]) => {
+    ]).subscribe(([home, products, categories, brands, marketplace, cart, wishlist, orders, viewProfile, addresses, settings, logout]) => {
       // Update translation signal - menuItems computed will auto-update
-      this.translationStrings.set({ home, products, categories, brands, cart, wishlist, orders, viewProfile, addresses, settings, logout });
+      this.translationStrings.set({ home, products, categories, brands, marketplace, cart, wishlist, orders, viewProfile, addresses, settings, logout });
     });
   }
 

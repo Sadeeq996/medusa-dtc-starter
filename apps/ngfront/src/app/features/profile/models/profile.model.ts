@@ -6,7 +6,7 @@ import { User } from '../../../core/models/user.model';
 
 /**
  * Profile Update Request
- * PUT /api/v1/users/updateMe
+ * PUT /customers/me
  */
 export interface UpdateProfileRequest {
   name: string;                         // Full name
@@ -25,7 +25,7 @@ export interface UpdateProfileResponse {
 
 /**
  * Change Password Request  
- * PUT /api/v1/users/changeMyPassword
+ * PUT /customers/password
  */
 export interface ChangePasswordRequest {
   currentPassword: string;              // Current password

@@ -1,25 +1,25 @@
 // API Endpoints Constants
-// Based on Route E-commerce API Documentation and Postman Collection
+// Based on Medusa Store API documentation and backend routes
 
 /**
  * Authentication Endpoints
  */
 export const AUTH_ENDPOINTS = {
-  SIGNUP: '/auth/signup',
-  SIGNIN: '/auth/signin',
-  FORGOT_PASSWORD: '/auth/forgotPasswords',
-  VERIFY_RESET_CODE: '/auth/verifyResetCode',
-  RESET_PASSWORD: '/auth/resetPassword',
-  VERIFY_TOKEN: '/auth/verifyToken'
+  SIGNUP: '/customers',
+  SIGNIN: '/auth',
+  FORGOT_PASSWORD: '/customers/password-reset',
+  VERIFY_RESET_CODE: '/customers/password-reset/verify',
+  RESET_PASSWORD: '/customers/password-reset',
+  VERIFY_TOKEN: '/auth/verify'
 } as const;
 
 /**
  * User Management Endpoints
  */
 export const USER_ENDPOINTS = {
-  CHANGE_PASSWORD: '/users/changeMyPassword',
-  UPDATE_PROFILE: '/users/updateMe',
-  GET_ALL_USERS: '/users'
+  CHANGE_PASSWORD: '/customers/password',
+  UPDATE_PROFILE: '/customers/me',
+  GET_ALL_USERS: '/customers'
 } as const;
 
 /**
@@ -56,14 +56,29 @@ export const BRAND_ENDPOINTS = {
 } as const;
 
 /**
+ * Vendor / Marketplace Endpoints
+ */
+export const VENDOR_ENDPOINTS = {
+  GET_ALL: '/vendors',
+  GET_BY_HANDLE: (handle: string) => `/vendors/${handle}`
+} as const;
+
+export const VENDOR_ADMIN_ENDPOINTS = {
+  GET_PRODUCTS: '/vendors/products',
+  CREATE_PRODUCT: '/vendors/products',
+  GET_ORDERS: '/vendors/orders'
+} as const;
+
+/**
  * Shopping Cart Endpoints
  */
 export const CART_ENDPOINTS = {
-  ADD_ITEM: '/cart',
-  GET_CART: '/cart',
-  UPDATE_ITEM: (productId: string) => `/cart/${productId}`,
-  REMOVE_ITEM: (productId: string) => `/cart/${productId}`,
-  CLEAR_CART: '/cart'
+  CREATE_CART: '/carts',
+  GET_CART: (cartId: string) => `/carts/${cartId}`,
+  ADD_ITEM: (cartId: string) => `/carts/${cartId}/line-items`,
+  UPDATE_ITEM: (cartId: string, itemId: string) => `/carts/${cartId}/line-items/${itemId}`,
+  REMOVE_ITEM: (cartId: string, itemId: string) => `/carts/${cartId}/line-items/${itemId}`,
+  CLEAR_CART: (cartId: string) => `/carts/${cartId}`
 } as const;
 
 /**
@@ -89,6 +104,7 @@ export const ADDRESS_ENDPOINTS = {
  * Order Endpoints
  */
 export const ORDER_ENDPOINTS = {
+  COMPLETE_VENDOR_CART: (cartId: string) => `/carts/${cartId}/complete-vendor`,
   CREATE_CASH_ORDER: (cartId: string) => `/orders/${cartId}`,
   CREATE_STRIPE_SESSION: (cartId: string) => `/orders/checkout-session/${cartId}`,
   GET_ALL_ORDERS: '/orders',
@@ -111,7 +127,8 @@ export const HTTP_METHODS = {
 export const HEADERS = {
   CONTENT_TYPE: 'Content-Type',
   APPLICATION_JSON: 'application/json',
-  TOKEN: 'token'                      // Custom token header (NOT Authorization Bearer)
+  AUTHORIZATION: 'Authorization',
+  TOKEN: 'token'                      // Legacy token header
 } as const;
 
 /**
