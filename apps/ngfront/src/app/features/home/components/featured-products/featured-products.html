@@ -1,0 +1,64 @@
+<!-- Featured Products Section - PrimeNG Components with Tailwind CSS -->
+<section class="py-12">
+  <div class="max-w-7xl mx-auto px-4">
+    
+    <!-- Section Header -->
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-8 gap-4">
+      <div class="text-center md:text-start">
+        <h2 class="text-2xl md:text-3xl font-bold text-color mb-2">
+          {{ 'HOME.FEATURED_PRODUCTS.TITLE' | translate }}
+        </h2>
+        <p class="text-muted-color">
+          {{ 'HOME.FEATURED_PRODUCTS.SUBTITLE' | translate }}
+        </p>
+      </div>
+      
+      <p-button 
+        [label]="'HOME.FEATURED_PRODUCTS.VIEW_ALL' | translate"
+        icon="pi pi-arrow-right"
+        iconPos="right" 
+        routerLink="/products"
+        severity="secondary"
+        [text]="true"
+        class="hidden md:block">
+      </p-button>
+    </div>
+    
+    <!-- Products Grid -->
+    <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
+      @if (loading()) {
+        @for (item of [1,2,3,4,5,6]; track item) {
+          <p-card class="shadow-sm">
+            <p-skeleton width="100%" height="200px" styleClass="mb-4"></p-skeleton>
+            <p-skeleton width="80%" height="1.5rem" styleClass="mb-2"></p-skeleton>
+            <p-skeleton width="60%" height="1rem" styleClass="mb-4"></p-skeleton>
+            <p-skeleton width="40%" height="1.5rem"></p-skeleton>
+          </p-card>
+        }
+      } @else {
+        @for (product of featuredProducts(); track product._id) {
+          <app-product-card [product]="product"></app-product-card>
+        } @empty {
+          <div class="col-span-full text-center text-muted-color py-8">
+            <p>{{ 'HOME.FEATURED_PRODUCTS.NO_PRODUCTS' | translate }}</p>
+          </div>
+        }
+      }
+    </div>
+    
+    <!-- View All Button (Mobile) -->
+    <div class="text-center mt-8 md:hidden">
+      <p-button 
+        [label]="'HOME.FEATURED_PRODUCTS.VIEW_ALL' | translate"
+        icon="pi pi-arrow-right"
+        iconPos="right"
+        severity="secondary"
+        [text]="true"
+        size="large"
+        routerLink="/products"
+        class="w-full sm:w-auto">
+      </p-button>
+    </div>
+  </div>
+</section>
+

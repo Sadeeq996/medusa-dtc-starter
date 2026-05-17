@@ -1,0 +1,97 @@
+<div class="lg:sticky lg:top-4 lg:self-start">
+  <p-card>
+    <ng-template pTemplate="header">
+      <div class="flex items-center gap-3 p-4 bg-emphasis">
+        <i class="pi pi-shopping-cart text-primary" aria-hidden="true"></i>
+        <h3 class="font-semibold text-color">Order Summary</h3>
+      </div>
+    </ng-template>
+    
+    <div class="space-y-6">
+      <!-- Cart Items -->
+      @if (cartItems().length > 0) {
+        <div class="space-y-3" role="list" aria-label="Order items">
+          @for (item of cartItems(); track trackCartItem(item)) {
+            <div 
+              class="flex gap-3 py-3 border-b border-surface last:border-b-0"
+              role="listitem">
+              <img 
+                [src]="getProductImageUrl(item)"
+                [alt]="item.product.title"
+                class="w-16 h-16 object-cover rounded-lg border border-surface" />
+              
+              <div class="flex-1 min-w-0">
+                <h4 class="font-medium text-color text-sm line-clamp-2 mb-1">
+                  {{ item.product.title }}
+                </h4>
+                <div class="flex items-center justify-between">
+                  <span class="text-xs text-muted-color">
+                    Qty: {{ item.quantity }}
+                  </span>
+                  <span class="font-semibold text-color text-sm">
+                    {{ formatPrice(item.totalPrice) }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      } @else {
+        <div class="text-center text-muted-color py-8">
+          <i class="pi pi-shopping-cart text-3xl mb-2 block" aria-hidden="true"></i>
+          <p>{{ 'CHECKOUT.NO_ITEMS' | translate }}</p>
+        </div>
+      }
+
+      <!-- Order Totals -->
+      @if (cartSummary().totalItems > 0) {
+        <div class="space-y-3 pt-4 border-t border-surface">
+          <div class="flex justify-between items-center">
+            <span class="text-muted-color">
+              @if (cartSummary().totalItems === 1) {
+                {{ 'CART.SUBTOTAL' | translate }} ({{ 'CART.ITEMS_COUNT_SINGULAR' | translate }})
+              } @else {
+                {{ 'CART.SUBTOTAL' | translate }} ({{ 'CART.ITEMS_COUNT_PLURAL' | translate: { count: cartSummary().totalItems } }})
+              }
+            </span>
+            <span class="font-medium text-color">
+              {{ formatPrice(cartSummary().totalPrice) }}
+            </span>
+          </div>
+          
+          <div class="flex justify-between items-center">
+            <span class="text-muted-color">{{ 'CHECKOUT.SHIPPING' | translate }}</span>
+            <span class="font-medium text-green-600">{{ 'CHECKOUT.FREE' | translate }}</span>
+          </div>
+          
+          <p-divider></p-divider>
+          
+          <div class="flex justify-between items-center text-lg font-bold">
+            <span class="text-color">{{ 'CART.TOTAL' | translate }}</span>
+            <span class="text-primary">
+              {{ formatPrice(cartSummary().totalPrice) }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Action Buttons Slot -->
+        <div class="space-y-3">
+          <ng-content select="[orderActions]"></ng-content>
+        </div>
+
+        <!-- Back to Cart Button -->
+        <p-button 
+          label="{{ 'CHECKOUT.BACK_TO_CART' | translate }}"
+          severity="secondary"
+          [text]="true"
+          icon="pi pi-arrow-left"
+          routerLink="/cart"
+          [disabled]="isProcessing()"
+          class="w-full"
+          [attr.aria-label]="'CHECKOUT.BACK_TO_CART' | translate">
+        </p-button>
+      }
+    </div>
+  </p-card>
+</div>
+

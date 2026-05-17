@@ -1,0 +1,283 @@
+<!-- Addresses Page - Pure PrimeNG + Tailwind CSS -->
+<div class="min-h-screen">
+
+  <!-- Page Header -->
+  <div class="border-b border-surface shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 py-6">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <i class="pi pi-map-marker text-2xl text-primary"></i>
+          <h1 class="text-2xl font-bold text-color">
+            {{ 'PROFILE.ADDRESSES.TITLE' | translate }}
+          </h1>
+        </div>
+        
+        <!-- Add Address Button -->
+        <p-button 
+          [label]="'PROFILE.ADDRESSES.ADD_NEW_ADDRESS' | translate"
+          severity="primary"
+          icon="pi pi-plus"
+          (click)="openAddDrawer()"
+          [disabled]="isProcessing()">
+        </p-button>
+      </div>
+    </div>
+  </div>
+
+  <div class="max-w-7xl mx-auto px-4 py-8">
+
+    <!-- Error Message -->
+    @if (error()) {
+      <div class="mb-6">
+        <p-message 
+          severity="error" 
+          [text]="error()"
+          [closable]="true"
+          (onClose)="clearError()">
+        </p-message>
+      </div>
+    }
+
+    <!-- Loading State -->
+    @if (showLoadingState()) {
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        @for (i of [1,2,3]; track i) {
+          <p-card>
+            <div class="space-y-4">
+              <p-skeleton width="60%" height="1.5rem"></p-skeleton>
+              <p-skeleton width="100%" height="1rem"></p-skeleton>
+              <p-skeleton width="80%" height="1rem"></p-skeleton>
+              <p-skeleton width="40%" height="2rem"></p-skeleton>
+            </div>
+          </p-card>
+        }
+      </div>
+    }
+
+    <!-- Empty State -->
+    @else if (showEmptyState()) {
+      <div class="flex flex-col items-center justify-center py-16 text-center">
+        <div class="bg-surface-100 rounded-full p-8 mb-6">
+          <i class="pi pi-map-marker text-6xl text-muted-color"></i>
+        </div>
+        
+        <h2 class="text-2xl font-semibold text-color mb-2">
+          {{ 'PROFILE.ADDRESSES.NO_ADDRESSES_YET' | translate }}
+        </h2>
+        
+        <p class="text-muted-color mb-8 max-w-md">
+          {{ 'PROFILE.ADDRESSES.NO_ADDRESSES_MESSAGE' | translate }}
+        </p>
+        
+        <p-button 
+          [label]="'PROFILE.ADDRESSES.ADD_FIRST_ADDRESS' | translate"
+          severity="primary"
+          icon="pi pi-plus"
+          (click)="openAddDrawer()"
+          size="large">
+        </p-button>
+      </div>
+    }
+
+    <!-- Addresses Grid -->
+    @else if (hasAddresses()) {
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        @for (address of addresses(); track trackByAddressId($index, address)) {
+          <p-card class="hover:shadow-lg transition-shadow">
+            <ng-template pTemplate="header">
+              <div class="flex items-center justify-between p-4 bg-emphasis">
+                <div class="flex items-center gap-2">
+                  <i class="pi pi-map-marker text-primary"></i>
+                  <span class="font-semibold text-color">{{ address.name }}</span>
+                </div>
+              </div>
+            </ng-template>
+            
+            <div class="space-y-3">
+              <!-- Address Details -->
+              <div class="flex items-start gap-2">
+                <i class="pi pi-home text-muted-color mt-1 flex-shrink-0"></i>
+                <p class="text-color text-sm">
+                  {{ address.details }}
+                </p>
+              </div>
+              
+              <!-- City -->
+              <div class="flex items-center gap-2">
+                <i class="pi pi-map text-muted-color"></i>
+                <p class="text-color text-sm">{{ address.city }}</p>
+              </div>
+              
+              <!-- Phone -->
+              <div class="flex items-center gap-2">
+                <i class="pi pi-phone text-muted-color"></i>
+                <p class="text-color text-sm">{{ address.phone }}</p>
+              </div>
+            </div>
+            
+            <ng-template pTemplate="footer">
+              <div class="flex justify-end gap-2 pt-4 border-t border-surface">
+                <p-button 
+                  [label]="'PROFILE.ADDRESSES.DELETE' | translate"
+                  severity="danger"
+                  [outlined]="true"
+                  icon="pi pi-trash"
+                  size="small"
+                  [disabled]="isProcessing()"
+                  (click)="deleteAddress(address._id)">
+                </p-button>
+              </div>
+            </ng-template>
+          </p-card>
+        }
+      </div>
+      
+      <!-- Info Message -->
+      <div class="mt-8">
+        <p-message 
+          severity="info" 
+          [text]="'PROFILE.ADDRESSES.EDIT_NOTE' | translate"
+          class="block">
+        </p-message>
+      </div>
+    }
+
+  </div>
+</div>
+
+<!-- Add Address Drawer -->
+<p-drawer 
+  [visible]="showAddDrawer()" 
+  (onHide)="closeAddDrawer()"
+  position="right"
+  [style]="{ width: '500px' }"
+  [header]="'PROFILE.ADDRESSES.DRAWER.TITLE' | translate">
+  
+  <form [formGroup]="addressForm" (ngSubmit)="onSubmitAddress()" class="flex flex-col h-full">
+    
+    <div class="flex-1 space-y-6 overflow-y-auto pr-2">
+      
+      <!-- Address Name -->
+      <div class="flex flex-col gap-2">
+        <label for="name" class="text-sm font-medium text-color">
+          {{ 'PROFILE.ADDRESSES.DRAWER.ADDRESS_LABEL' | translate }} <span class="text-red-500">*</span>
+        </label>
+        <input 
+          id="name"
+          type="text" 
+          pInputText 
+          formControlName="name"
+          [placeholder]="'PROFILE.ADDRESSES.DRAWER.ADDRESS_LABEL_PLACEHOLDER' | translate"
+          class="w-full"
+          [class.p-invalid]="isFieldInvalid('name')" />
+        @if (isFieldInvalid('name')) {
+          <small class="text-red-500">
+            @if (addressForm.get('name')?.errors?.['required']) {
+              {{ 'PROFILE.ADDRESSES.DRAWER.ADDRESS_LABEL_REQUIRED' | translate }}
+            }
+            @if (addressForm.get('name')?.errors?.['minlength']) {
+              {{ 'PROFILE.ADDRESSES.DRAWER.ADDRESS_LABEL_MIN_LENGTH' | translate }}
+            }
+          </small>
+        }
+      </div>
+
+      <!-- Address Details -->
+      <div class="flex flex-col gap-2">
+        <label for="details" class="text-sm font-medium text-color">
+          {{ 'PROFILE.ADDRESSES.DRAWER.ADDRESS_DETAILS' | translate }} <span class="text-red-500">*</span>
+        </label>
+        <textarea
+          id="details"
+          pTextarea
+          formControlName="details"
+          [placeholder]="'PROFILE.ADDRESSES.DRAWER.ADDRESS_DETAILS_PLACEHOLDER' | translate"
+          rows="4"
+          class="w-full"
+          [class.p-invalid]="isFieldInvalid('details')">
+        </textarea>
+        @if (isFieldInvalid('details')) {
+          <small class="text-red-500">
+            @if (addressForm.get('details')?.errors?.['required']) {
+              {{ 'PROFILE.ADDRESSES.DRAWER.ADDRESS_DETAILS_REQUIRED' | translate }}
+            }
+            @if (addressForm.get('details')?.errors?.['minAddressLength']) {
+              {{ 'PROFILE.ADDRESSES.DRAWER.ADDRESS_DETAILS_MIN_LENGTH' | translate }}
+            }
+          </small>
+        }
+      </div>
+
+      <!-- Phone Number -->
+      <div class="flex flex-col gap-2">
+        <label for="phone" class="text-sm font-medium text-color">
+          {{ 'PROFILE.ADDRESSES.DRAWER.PHONE' | translate }} <span class="text-red-500">*</span>
+        </label>
+        <input
+          id="phone"
+          pInputText
+          formControlName="phone"
+          [placeholder]="'PROFILE.ADDRESSES.DRAWER.PHONE_PLACEHOLDER' | translate"
+          class="w-full"
+          [class.p-invalid]="isFieldInvalid('phone')" />
+        @if (isFieldInvalid('phone')) {
+          <small class="text-red-500">
+            @if (addressForm.get('phone')?.errors?.['required']) {
+              {{ 'PROFILE.ADDRESSES.DRAWER.PHONE_REQUIRED' | translate }}
+            }
+            @if (addressForm.get('phone')?.errors?.['invalidEgyptianPhone']) {
+              {{ 'PROFILE.ADDRESSES.DRAWER.PHONE_INVALID' | translate }}
+            }
+          </small>
+        }
+      </div>
+
+      <!-- City -->
+      <div class="flex flex-col gap-2">
+        <label for="city" class="text-sm font-medium text-color">
+          {{ 'PROFILE.ADDRESSES.DRAWER.CITY' | translate }} <span class="text-red-500">*</span>
+        </label>
+        <p-select
+          id="city"
+          formControlName="city"
+          [options]="egyptianCities"
+          [placeholder]="'PROFILE.ADDRESSES.DRAWER.CITY_PLACEHOLDER' | translate"
+          [showClear]="true"
+          [filter]="true"
+          filterBy="label"
+          class="w-full"
+          [class.p-invalid]="isFieldInvalid('city')">
+        </p-select>
+        @if (isFieldInvalid('city')) {
+          <small class="text-red-500">
+            {{ 'PROFILE.ADDRESSES.DRAWER.CITY_REQUIRED' | translate }}
+          </small>
+        }
+      </div>
+      
+    </div>
+    
+    <!-- Form Actions -->
+    <div class="flex justify-end gap-2 pt-6 border-t border-surface mt-6">
+      <p-button 
+        [label]="'PROFILE.ADDRESSES.DRAWER.CANCEL' | translate" 
+        severity="secondary"
+        [outlined]="true"
+        type="button"
+        (click)="closeAddDrawer()"
+        [disabled]="isProcessing()">
+      </p-button>
+      <p-button 
+        [label]="'PROFILE.ADDRESSES.DRAWER.ADD_ADDRESS' | translate" 
+        severity="primary"
+        icon="pi pi-check"
+        type="submit"
+        [loading]="isProcessing()"
+        [disabled]="addressForm.invalid || isProcessing()">
+      </p-button>
+    </div>
+    
+  </form>
+  
+</p-drawer>
+

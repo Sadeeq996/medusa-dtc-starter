@@ -1,0 +1,18 @@
+// FreshCart Footer - Minimal Custom CSS
+// All styling handled by PrimeNG + Tailwind CSS
+
+// Animation for newsletter subscription message
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+:host ::ng-deep p-message {
+  animation: slideDown 0.3s ease-out;
+}

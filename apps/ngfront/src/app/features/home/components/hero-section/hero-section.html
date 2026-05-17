@@ -1,0 +1,62 @@
+<!-- Hero Section - PrimeNG Carousel with Tailwind CSS -->
+<section class="py-6 md:py-12">
+  <div class="max-w-7xl mx-auto px-3 md:px-4">
+    <p-carousel 
+      [value]="heroSlides" 
+      [numVisible]="1" 
+      [numScroll]="1" 
+      [circular]="true" 
+      [autoplayInterval]="4000"
+      [showIndicators]="true"
+      [showNavigators]="true">
+      
+      <ng-template #item let-slide>
+        <p-card class="shadow-md md:shadow-lg overflow-hidden transition-transform duration-300 hover:-translate-y-0.5 mx-1 md:mx-2">
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-8 items-center">
+            
+            <!-- Image Side - First on Mobile, Second on Desktop -->
+            <div class="flex items-center justify-center order-1 lg:order-2">
+              <img 
+                [src]="slide.image" 
+                [alt]="slide.titleKey | translate"
+                class="w-full h-48 sm:h-56 md:h-64 lg:h-80 object-cover rounded-lg shadow-sm md:shadow-md transition-transform duration-300 hover:scale-[1.02]">
+            </div>
+            
+            <!-- Content Side - Second on Mobile, First on Desktop -->
+            <div class="text-center lg:text-start space-y-3 md:space-y-6 order-2 lg:order-1 pb-2 md:pb-0">
+              <h1 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-color leading-tight">
+                {{ slide.titleKey | translate }}
+              </h1>
+              <p class="text-sm sm:text-base md:text-lg text-muted-color leading-relaxed px-2 md:px-0">
+                {{ slide.descriptionKey | translate }}
+              </p>
+              <div class="flex flex-col sm:flex-row gap-3 md:gap-4 justify-center lg:justify-start pt-2 md:pt-0">
+                <p-button 
+                  [label]="slide.primaryAction.labelKey | translate"
+                  icon="pi pi-shopping-cart"
+                  routerLink="/products"
+                  severity="primary"
+                  [size]="isMobile() ? 'small' : 'large'"
+                  class="w-full sm:w-auto sm:flex-none">
+                </p-button>
+                <p-button 
+                  [label]="slide.secondaryAction.labelKey | translate"
+                  icon="pi pi-arrow-right"
+                  iconPos="right"
+                  routerLink="/products"
+                  severity="secondary"
+                  [outlined]="true"
+                  [size]="isMobile() ? 'small' : 'large'"
+                  class="w-full sm:w-auto sm:flex-none">
+                </p-button>
+              </div>
+            </div>
+            
+          </div>
+        </p-card>
+      </ng-template>
+      
+    </p-carousel>
+  </div>
+</section>
+

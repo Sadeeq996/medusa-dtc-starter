@@ -1,0 +1,344 @@
+<!-- Order Details Page - Pure PrimeNG + Tailwind CSS -->
+<div class="min-h-screen">
+
+  <!-- Loading State -->
+  @if (loading() && !hasOrder()) {
+    <div class="max-w-7xl mx-auto px-4 py-6">
+      <p-skeleton width="300px" height="1.5rem" class="mb-4"></p-skeleton>
+      
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="lg:col-span-2 space-y-4">
+          <p-card>
+            <p-skeleton width="100%" height="150px"></p-skeleton>
+          </p-card>
+          <p-card>
+            <p-skeleton width="100%" height="300px"></p-skeleton>
+          </p-card>
+        </div>
+        <div>
+          <p-card>
+            <p-skeleton width="100%" height="200px"></p-skeleton>
+          </p-card>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Error State -->
+  @else if (error() && !loading()) {
+    <div class="max-w-md mx-auto px-4 py-12 text-center">
+      <p-card class="shadow-sm">
+        <i class="pi pi-exclamation-triangle text-4xl text-red-600 mb-4"></i>
+        <h2 class="text-xl font-bold text-color mb-4">{{ 'PROFILE.ORDER_DETAILS.NOT_FOUND' | translate }}</h2>
+        <p-message severity="error" [text]="error()" class="mb-6"></p-message>
+        <div class="flex gap-3 justify-center">
+          <p-button 
+            [label]="'PROFILE.ORDER_DETAILS.BACK_TO_ORDERS' | translate"
+            icon="pi pi-arrow-left"
+            (click)="backToOrders()"
+            severity="secondary">
+          </p-button>
+          <p-button 
+            [label]="'PROFILE.ORDER_DETAILS.RETRY' | translate"
+            icon="pi pi-refresh"
+            (click)="retry()"
+            severity="primary">
+          </p-button>
+        </div>
+      </p-card>
+    </div>
+  }
+
+  <!-- Order Content -->
+  @else if (hasOrder() && orderSummary()) {
+    <div>
+      
+      <!-- Breadcrumb Navigation -->
+      <div class="border-b border-surface">
+        <div class="max-w-7xl mx-auto px-4 py-4">
+          <p-breadcrumb 
+            [model]="breadcrumbItems()" 
+            [home]="{icon: 'pi pi-home', routerLink: '/'}"
+            class="!bg-transparent">
+          </p-breadcrumb>
+        </div>
+      </div>
+      
+      <!-- Page Header -->
+      <div class="border-b border-surface shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 py-6">
+          <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center gap-4">
+              <h1 class="text-2xl font-bold text-color">
+                {{ 'PROFILE.ORDER_DETAILS.ORDER_NUMBER' | translate: { number: orderSummary()!.orderNumber } }}
+              </h1>
+              <p-tag 
+                [value]="orderSummary()!.status"
+                [severity]="getStatusSeverity(orderSummary()!)"
+                [rounded]="true">
+              </p-tag>
+            </div>
+            
+            <p-button 
+              [label]="'PROFILE.ORDER_DETAILS.BACK_TO_ORDERS' | translate"
+              severity="secondary"
+              [outlined]="true"
+              icon="pi pi-arrow-left"
+              (click)="backToOrders()"
+              size="small">
+            </p-button>
+          </div>
+          
+          <p class="text-muted-color">
+            {{ 'PROFILE.ORDER_DETAILS.PLACED_ON' | translate: { date: orderSummary()!.orderDate } }}
+          </p>
+        </div>
+      </div>
+      
+      <!-- Order Details Content -->
+      <div class="max-w-7xl mx-auto px-4 py-8">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          
+          <!-- Left Column: Order Items & Shipping -->
+          <div class="lg:col-span-2 space-y-6">
+            
+            <!-- Order Items -->
+            <p-card>
+              <ng-template pTemplate="header">
+                <div class="flex items-center gap-3 p-4 bg-emphasis">
+                  <i class="pi pi-box text-primary"></i>
+                  <h3 class="font-semibold text-color">
+                    {{ 'PROFILE.ORDER_DETAILS.ORDER_ITEMS' | translate: { count: orderSummary()!.totalItems } }}
+                  </h3>
+                </div>
+              </ng-template>
+              
+              <div class="space-y-0">
+                @for (item of order()!.cartItems; track item._id) {
+                  <div class="flex gap-4 p-4 border-b border-surface last:border-b-0 hover:bg-emphasis transition-colors">
+                    
+                    <!-- Product Image -->
+                    <div 
+                      class="flex-shrink-0 cursor-pointer group"
+                      (click)="viewProduct(item.product._id)">
+                      <img 
+                        [src]="item.product.imageCover"
+                        [alt]="item.product.title"
+                        class="w-20 h-20 object-cover rounded-lg border border-surface group-hover:shadow-md transition-shadow"
+                      />
+                    </div>
+                    
+                    <!-- Product Details -->
+                    <div class="flex-1 min-w-0">
+                      <h4 
+                        class="font-medium text-color hover:text-primary cursor-pointer transition-colors line-clamp-2 mb-2"
+                        (click)="viewProduct(item.product._id)">
+                        {{ item.product.title }}
+                      </h4>
+                      
+                      <div class="flex items-center gap-2 mb-2">
+                        @if (item.product.brand) {
+                          <p-tag 
+                            [value]="item.product.brand.name"
+                            [rounded]="true"
+                            size="small">
+                          </p-tag>
+                        }
+                        @if (item.product.category) {
+                          <p-tag 
+                            [value]="item.product.category.name"
+                            severity="secondary"
+                            [rounded]="true"
+                            size="small">
+                          </p-tag>
+                        }
+                      </div>
+                      
+                      <p class="text-sm text-muted-color">
+                        {{ 'PROFILE.ORDER_DETAILS.QUANTITY' | translate }}: {{ item.count }}
+                      </p>
+                    </div>
+                    
+                    <!-- Item Price -->
+                    <div class="text-right">
+                      <p class="font-semibold text-color">
+                        {{ formatPrice(item.price) }}
+                      </p>
+                      <p class="text-sm text-muted-color mt-1">
+                        {{ 'PROFILE.ORDER_DETAILS.TOTAL' | translate }}: {{ formatPrice(item.price * item.count) }}
+                      </p>
+                    </div>
+                    
+                  </div>
+                }
+              </div>
+            </p-card>
+            
+            <!-- Shipping Address -->
+            <p-card>
+              <ng-template pTemplate="header">
+                <div class="flex items-center gap-3 p-4 bg-emphasis">
+                  <i class="pi pi-map-marker text-primary"></i>
+                  <h3 class="font-semibold text-color">
+                    {{ 'PROFILE.ORDER_DETAILS.SHIPPING_ADDRESS' | translate }}
+                  </h3>
+                </div>
+              </ng-template>
+              
+              <div class="space-y-3">
+                <div class="flex items-start gap-3">
+                  <i class="pi pi-home text-muted-color mt-1"></i>
+                  <div>
+                    <p class="text-color">{{ order()!.shippingAddress.details }}</p>
+                  </div>
+                </div>
+                
+                <div class="flex items-center gap-3">
+                  <i class="pi pi-map text-muted-color"></i>
+                  <p class="text-color">{{ order()!.shippingAddress.city }}</p>
+                </div>
+                
+                <div class="flex items-center gap-3">
+                  <i class="pi pi-phone text-muted-color"></i>
+                  <p class="text-color">{{ order()!.shippingAddress.phone }}</p>
+                </div>
+              </div>
+            </p-card>
+            
+          </div>
+          
+          <!-- Right Column: Order Summary -->
+          <div class="lg:col-span-1">
+            <div class="sticky top-4 space-y-6">
+              
+              <!-- Order Summary Card -->
+              <p-card>
+                <ng-template pTemplate="header">
+                  <div class="flex items-center gap-3 p-4 bg-emphasis">
+                    <i class="pi pi-receipt text-primary"></i>
+                    <h3 class="font-semibold text-color">
+                      {{ 'PROFILE.ORDER_DETAILS.ORDER_SUMMARY' | translate }}
+                    </h3>
+                  </div>
+                </ng-template>
+                
+                <div class="space-y-4">
+                  
+                  <!-- Payment Method -->
+                  <div class="flex justify-between items-center">
+                    <span class="text-muted-color">{{ 'PROFILE.ORDER_DETAILS.PAYMENT_METHOD' | translate }}</span>
+                    <p-tag 
+                      [value]="orderSummary()!.paymentMethod"
+                      [severity]="getPaymentMethodSeverity(order()!.paymentMethodType)"
+                      [rounded]="true">
+                    </p-tag>
+                  </div>
+                  
+                  <!-- Payment Status -->
+                  <div class="flex justify-between items-center">
+                    <span class="text-muted-color">{{ 'PROFILE.ORDER_DETAILS.PAYMENT_STATUS' | translate }}</span>
+                    <p-tag 
+                      [value]="order()!.isPaid ? ('PROFILE.ORDER_DETAILS.PAID' | translate) : ('PROFILE.ORDER_DETAILS.UNPAID' | translate)"
+                      [severity]="order()!.isPaid ? 'success' : 'warn'"
+                      [rounded]="true">
+                    </p-tag>
+                  </div>
+                  
+                  <!-- Delivery Status -->
+                  <div class="flex justify-between items-center">
+                    <span class="text-muted-color">{{ 'PROFILE.ORDER_DETAILS.DELIVERY_STATUS' | translate }}</span>
+                    <p-tag 
+                      [value]="order()!.isDelivered ? ('PROFILE.ORDER_DETAILS.DELIVERED' | translate) : ('PROFILE.ORDER_DETAILS.PENDING' | translate)"
+                      [severity]="order()!.isDelivered ? 'success' : 'info'"
+                      [rounded]="true">
+                    </p-tag>
+                  </div>
+                  
+                  <p-divider></p-divider>
+                  
+                  <!-- Price Breakdown -->
+                  <div class="space-y-2">
+                    <div class="flex justify-between items-center">
+                      <span class="text-muted-color">{{ 'PROFILE.ORDER_DETAILS.SUBTOTAL' | translate }}</span>
+                      <span class="font-medium text-color">
+                        {{ formatPrice(order()!.totalOrderPrice - order()!.taxPrice - order()!.shippingPrice) }}
+                      </span>
+                    </div>
+                    
+                    @if (order()!.shippingPrice > 0) {
+                      <div class="flex justify-between items-center">
+                        <span class="text-muted-color">{{ 'PROFILE.ORDER_DETAILS.SHIPPING' | translate }}</span>
+                        <span class="font-medium text-color">
+                          {{ formatPrice(order()!.shippingPrice) }}
+                        </span>
+                      </div>
+                    }
+                    
+                    @if (order()!.taxPrice > 0) {
+                      <div class="flex justify-between items-center">
+                        <span class="text-muted-color">{{ 'PROFILE.ORDER_DETAILS.TAX' | translate }}</span>
+                        <span class="font-medium text-color">
+                          {{ formatPrice(order()!.taxPrice) }}
+                        </span>
+                      </div>
+                    }
+                  </div>
+                  
+                  <p-divider></p-divider>
+                  
+                  <!-- Total -->
+                  <div class="flex justify-between items-center text-lg font-bold">
+                    <span class="text-color">{{ 'PROFILE.ORDER_DETAILS.TOTAL' | translate }}</span>
+                    <span class="text-primary">
+                      {{ formatPrice(order()!.totalOrderPrice) }}
+                    </span>
+                  </div>
+                  
+                  @if (order()!.paidAt) {
+                    <p-divider></p-divider>
+                    <div class="text-sm text-muted-color">
+                      <i class="pi pi-check-circle text-green-500"></i>
+                      {{ 'PROFILE.ORDER_DETAILS.PAID_ON' | translate: { date: formatDate(order()!.paidAt!) } }}
+                    </div>
+                  }
+                </div>
+              </p-card>
+              
+              <!-- Customer Info Card -->
+              <p-card>
+                <ng-template pTemplate="header">
+                  <div class="flex items-center gap-3 p-4 bg-emphasis">
+                    <i class="pi pi-user text-primary"></i>
+                    <h3 class="font-semibold text-color">
+                      {{ 'PROFILE.ORDER_DETAILS.CUSTOMER_INFORMATION' | translate }}
+                    </h3>
+                  </div>
+                </ng-template>
+                
+                <div class="space-y-3">
+                  <div>
+                    <p class="text-sm text-muted-color">{{ 'PROFILE.ORDER_DETAILS.NAME' | translate }}</p>
+                    <p class="text-color font-medium">{{ order()!.user.name }}</p>
+                  </div>
+                  <div>
+                    <p class="text-sm text-muted-color">{{ 'PROFILE.ORDER_DETAILS.EMAIL' | translate }}</p>
+                    <p class="text-color">{{ order()!.user.email }}</p>
+                  </div>
+                  <div>
+                    <p class="text-sm text-muted-color">{{ 'PROFILE.ORDER_DETAILS.PHONE' | translate }}</p>
+                    <p class="text-color">{{ order()!.user.phone }}</p>
+                  </div>
+                </div>
+              </p-card>
+              
+            </div>
+          </div>
+          
+        </div>
+      </div>
+      
+    </div>
+  }
+
+</div>
+

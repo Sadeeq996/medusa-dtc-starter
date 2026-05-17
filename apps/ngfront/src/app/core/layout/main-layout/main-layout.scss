@@ -1,0 +1,17 @@
+// Main Layout Styles
+// ✅ Following PrimeNG + Tailwind Best Practices
+// ✅ All styling is handled by Tailwind utility classes in the HTML template
+// ✅ No custom CSS needed - PrimeNG components handle theme-aware styling
+
+// Print styles only (the one thing Tailwind doesn't handle well inline)
+@media print {
+  header,
+  footer {
+    display: none;
+  }
+  
+  main {
+    margin: 0;
+    padding: 0;
+  }
+}

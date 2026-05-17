@@ -1,0 +1,207 @@
+<!-- Enhanced Category List Page - Pure PrimeNG + Tailwind CSS -->
+<div class="min-h-screen">
+  
+  <!-- Compact Page Header -->
+  <div class="border-b border-surface shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 py-6">
+      
+      <!-- Title and Controls Row -->
+      <div class="flex flex-col lg:flex-row lg:items-center gap-6">
+        
+        <!-- Left: Title and Icon -->
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 bg-primary rounded-xl flex items-center justify-center">
+            <i class="pi pi-th-large text-primary-contrast text-lg"></i>
+          </div>
+          <div>
+            <h1 class="text-2xl font-bold text-color">{{ 'CATEGORIES.LIST.TITLE' | translate }}</h1>
+            @if (!loading() && hasCategories()) {
+              <p class="text-sm text-muted-color">
+                {{ 'CATEGORIES.LIST.CATEGORIES_FOUND' | translate: {count: totalCategories() | number} }}
+                @if (searchQuery()) {
+                  <span class="ml-1">{{ 'CATEGORIES.LIST.FOR_QUERY' | translate: {query: searchQuery()} }}</span>
+                }
+              </p>
+            }
+          </div>
+        </div>
+        
+        <!-- Right: Search Control -->
+        <div class="flex flex-1 lg:flex-none flex-col sm:flex-row gap-3 lg:min-w-[400px]">
+          
+          <!-- Search Input with Integrated Actions -->
+          <div class="flex gap-2 flex-1">
+            <div class="flex-1 relative">
+              <p-iconfield iconPosition="left" class="w-full">
+                <p-inputicon class="pi pi-search" />
+                <input 
+                  type="text"
+                  pInputText
+                  [value]="searchQuery()"
+                  (input)="onSearch($any($event.target).value)"
+                  [placeholder]="'CATEGORIES.LIST.SEARCH_PLACEHOLDER' | translate"
+                  class="w-full pr-12"
+                  (keyup.enter)="onSearch($any($event.target).value)"
+                />
+              </p-iconfield>
+              
+              <!-- Clear Button Inside Input -->
+               @if (searchQuery()) {
+                <p-button
+                  icon="pi pi-times"
+                  severity="secondary"
+                  [text]="true"
+                  size="small"
+                  (click)="clearSearch()"
+                  [disabled]="loading()"
+                  class="!absolute !right-2 !top-1/2 !-translate-y-1/2 !w-7 !h-7 !p-0 !min-w-0 !flex !items-center !justify-center !rounded-full"
+                  [ariaLabel]="'CATEGORIES.LIST.CLEAR_SEARCH_ARIA' | translate">
+                </p-button>
+              }
+            </div>
+          </div>
+          
+        </div>
+        
+      </div>
+      
+    </div>
+  </div>
+
+  <!-- Main Content Area -->
+  <div class="py-8">
+    <div class="max-w-7xl mx-auto px-4">
+      
+      <!-- Loading State with Skeleton Grid -->
+      @if (loading()) {
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 md:gap-6">
+          @for (item of generateSkeletonItems(); track item) {
+            <p-card class="shadow-sm h-64">
+              <p-skeleton height="10rem" styleClass="mb-4 rounded-lg"></p-skeleton>
+              <p-skeleton width="80%" height="1rem" styleClass="mb-3"></p-skeleton>
+              <p-skeleton width="60%" height="0.875rem"></p-skeleton>
+            </p-card>
+          }
+        </div>
+      }
+      
+      <!-- Error State -->
+      @else if (error()) {
+        <div class="text-center py-20">
+          <div class="max-w-md mx-auto">
+            <div class="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-6">
+              <i class="pi pi-exclamation-triangle text-2xl text-red-600"></i>
+            </div>
+            <h3 class="text-xl font-semibold text-color mb-4">
+              {{ 'CATEGORIES.DETAILS.SOMETHING_WRONG' | translate }}
+            </h3>
+            <p-message
+              severity="error"
+              class="mb-6 text-left">
+              {{ error() }}
+            </p-message>
+            <p-button
+              [label]="'CATEGORIES.DETAILS.RETRY' | translate"
+              icon="pi pi-refresh"
+              (click)="retryLoading()"
+              severity="primary"
+              [outlined]="true">
+            </p-button>
+          </div>
+        </div>
+      }
+      
+      <!-- Empty State -->
+      @else if (!hasCategories() && !loading()) {
+        <div class="text-center py-20">
+          <div class="max-w-md mx-auto">
+            <div class="w-20 h-20 bg-surface-100 rounded-full flex items-center justify-center mx-auto mb-8">
+              <i class="pi pi-search text-3xl text-muted-color"></i>
+            </div>
+            <h3 class="text-2xl font-bold text-color mb-4">
+              @if (searchQuery()) {
+                {{ 'CATEGORIES.LIST.NO_CATEGORIES_FOUND' | translate }}
+              } @else {
+                {{ 'CATEGORIES.LIST.NO_CATEGORIES_AVAILABLE' | translate }}
+              }
+            </h3>
+            <p class="text-muted-color mb-8 leading-relaxed">
+              @if (searchQuery()) {
+                {{ 'CATEGORIES.LIST.NO_SEARCH_RESULTS' | translate }}
+              } @else {
+                {{ 'CATEGORIES.LIST.NO_CATEGORIES_AVAILABLE' | translate }}
+              }
+            </p>
+            @if (searchQuery()) {
+              <p-button
+                [label]="'CATEGORIES.LIST.CLEAR_SEARCH' | translate"
+                icon="pi pi-times"
+                (click)="clearSearch()"
+                severity="primary"
+                [outlined]="true">
+              </p-button>
+            }
+          </div>
+        </div>
+      }
+      
+      <!-- Categories Grid -->
+      @else if (hasCategories()) {
+        <div class="space-y-8">
+          
+          <!-- Categories Grid -->
+          <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 md:gap-6">
+            @for (category of categories(); track category._id) {
+              <!-- Category Card -->
+              <div 
+                class="group relative overflow-hidden rounded-xl border border-surface shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-2 cursor-pointer h-64 flex flex-col"
+                (click)="navigateToCategory(category)"
+                [attr.aria-label]="'CATEGORIES.LIST.VIEW_CATEGORY_ARIA' | translate: {name: category.name}">
+                
+                <!-- Category Image Container -->
+                <div class="relative overflow-hidden bg-surface-100 flex-1">
+                  <img 
+                    [src]="category.image" 
+                    [alt]="category.name"
+                    class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
+                </div>
+                
+                <!-- Category Info -->
+                <div class="p-4">
+                  <h3 class="text-sm sm:text-base font-semibold text-color text-center line-clamp-2 leading-tight">
+                    {{ category.name }}
+                  </h3>
+                </div>
+                
+              </div>
+            }
+          </div>
+          
+          <!-- Pagination -->
+          @if (totalPages() > 1) {
+            <div class="mt-12 border-t border-surface pt-8">
+              <div class="flex flex-col items-center gap-4">
+                <p-paginator
+                  [rows]="itemsPerPage()"
+                  [totalRecords]="totalCategories()"
+                  [first]="(currentPage() - 1) * itemsPerPage()"
+                  (onPageChange)="onPageChange($event)"
+                  [showCurrentPageReport]="true"
+                  [currentPageReportTemplate]="'CATEGORIES.LIST.PAGINATION_TEMPLATE' | translate"
+                  [showJumpToPageDropdown]="false"
+                  [showFirstLastIcon]="true"
+                  [showPageLinks]="true"
+                  ariaLabel="Category list pagination navigation"
+                  class="bg-transparent border-0">
+                </p-paginator>
+              </div>
+            </div>
+          }
+          
+        </div>
+      }
+      
+    </div>
+  </div>
+  
+</div>

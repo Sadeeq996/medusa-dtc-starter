@@ -1,0 +1,303 @@
+<!-- Profile Dashboard - Overview & Quick Access -->
+<div class="min-h-screen">
+
+  <!-- Page Header -->
+  <div class="border-b border-surface shadow-sm">
+    <div class="max-w-6xl mx-auto px-4 py-4 sm:py-6">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 bg-primary rounded-xl flex items-center justify-center flex-shrink-0">
+          <i class="pi pi-user text-primary-contrast text-lg"></i>
+        </div>
+        <div class="min-w-0">
+          <h1 class="text-xl sm:text-2xl font-bold text-color">{{ 'PROFILE.DASHBOARD.TITLE' | translate }}</h1>
+          <p class="text-xs sm:text-sm text-muted-color">{{ 'PROFILE.DASHBOARD.SUBTITLE' | translate }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="max-w-6xl mx-auto px-4 py-6 sm:py-8">
+
+    <!-- Loading State -->
+    @if (loading()) {
+      <div class="space-y-6">
+        <!-- User Info Skeleton -->
+        <p-card class="shadow-sm">
+          <div class="flex items-center gap-4">
+            <p-skeleton shape="circle" size="4rem"></p-skeleton>
+            <div class="flex-1 space-y-2">
+              <p-skeleton width="200px" height="1.5rem"></p-skeleton>
+              <p-skeleton width="250px" height="1rem"></p-skeleton>
+              <p-skeleton width="180px" height="1rem"></p-skeleton>
+            </div>
+          </div>
+        </p-card>
+
+        <!-- Stats Skeleton -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          @for (i of [1,2,3]; track i) {
+            <p-card class="shadow-sm">
+              <p-skeleton width="100%" height="3rem"></p-skeleton>
+            </p-card>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- Error State -->
+    @else if (error()) {
+      <div class="flex justify-center items-center py-12">
+        <div class="text-center max-w-md">
+          <p-message severity="error" [text]="error()" class="mb-4 block"></p-message>
+          <p-button 
+            [label]="'PROFILE.DASHBOARD.RETRY' | translate" 
+            icon="pi pi-refresh" 
+            (click)="loadDashboardData()"
+            severity="secondary">
+          </p-button>
+        </div>
+      </div>
+    }
+
+    <!-- Dashboard Content -->
+    @else {
+      <div class="space-y-6">
+
+        <!-- User Info Card -->
+        <p-card class="shadow-sm">
+          <ng-template pTemplate="header">
+            <div class="flex items-center justify-between gap-2 p-3 sm:p-4 border-b border-surface">
+              <h3 class="font-semibold text-color text-sm sm:text-base">{{ 'PROFILE.DASHBOARD.ACCOUNT_INFO' | translate }}</h3>
+              <p-button 
+                icon="pi pi-pencil"
+                severity="secondary"
+                [outlined]="true"
+                size="small"
+                (click)="navigateToSettings()"
+                [ariaLabel]="'PROFILE.DASHBOARD.EDIT_PROFILE' | translate"
+                styleClass="sm:hidden">
+              </p-button>
+              <p-button 
+                [label]="'PROFILE.DASHBOARD.EDIT_PROFILE' | translate"
+                icon="pi pi-pencil"
+                severity="secondary"
+                [outlined]="true"
+                size="small"
+                (click)="navigateToSettings()"
+                class="hidden sm:block">
+              </p-button>
+            </div>
+          </ng-template>
+
+          <div class="flex flex-col sm:flex-row items-start gap-4 sm:gap-6">
+            <!-- Avatar -->
+            <div class="flex-shrink-0">
+              <p-avatar 
+                icon="pi pi-user" 
+                shape="circle"
+                size="xlarge"
+                styleClass="bg-primary text-primary-contrast w-16 h-16 text-2xl">
+              </p-avatar>
+            </div>
+
+            <!-- User Details -->
+            <div class="flex-1 min-w-0 space-y-3">
+              <div>
+                <h2 class="text-xl sm:text-2xl font-bold text-color mb-1 break-words">{{ currentUser()?.name }}</h2>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                <div class="flex items-start gap-3 min-w-0">
+                  <i class="pi pi-envelope text-primary flex-shrink-0 mt-1"></i>
+                  <div class="min-w-0 flex-1">
+                    <p class="text-xs text-muted-color mb-1">{{ 'PROFILE.DASHBOARD.EMAIL' | translate }}</p>
+                    <p class="font-medium text-color text-sm break-all">{{ currentUser()?.email }}</p>
+                  </div>
+                </div>
+
+                <div class="flex items-start gap-3 min-w-0">
+                  <i class="pi pi-phone text-primary flex-shrink-0 mt-1"></i>
+                  <div class="min-w-0 flex-1">
+                    <p class="text-xs text-muted-color mb-1">{{ 'PROFILE.DASHBOARD.PHONE' | translate }}</p>
+                    <p class="font-medium text-color text-sm">{{ currentUser()?.phone || ('PROFILE.DASHBOARD.NOT_PROVIDED' | translate) }}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </p-card>
+
+        <!-- Quick Stats Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
+          
+          <!-- Total Orders -->
+          <p-card 
+            class="shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+            (click)="navigateToOrders()">
+            <div class="flex items-center gap-3">
+              <div class="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                <i class="pi pi-box text-primary text-lg sm:text-xl"></i>
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="text-xs sm:text-sm text-muted-color">{{ 'PROFILE.DASHBOARD.TOTAL_ORDERS' | translate }}</p>
+                <p class="text-xl sm:text-2xl font-bold text-color">{{ stats().totalOrders }}</p>
+              </div>
+              <i class="pi pi-chevron-right text-muted-color flex-shrink-0"></i>
+            </div>
+          </p-card>
+
+          <!-- Saved Addresses -->
+          <p-card 
+            class="shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+            (click)="navigateToAddresses()">
+            <div class="flex items-center gap-3">
+              <div class="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                <i class="pi pi-map-marker text-primary text-lg sm:text-xl"></i>
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="text-xs sm:text-sm text-muted-color">{{ 'PROFILE.DASHBOARD.SAVED_ADDRESSES' | translate }}</p>
+                <p class="text-xl sm:text-2xl font-bold text-color">{{ stats().totalAddresses }}</p>
+              </div>
+              <i class="pi pi-chevron-right text-muted-color flex-shrink-0"></i>
+            </div>
+          </p-card>
+
+          <!-- Total Spent -->
+          <p-card class="shadow-sm sm:col-span-2 md:col-span-1">
+            <div class="flex items-center gap-3">
+              <div class="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                <i class="pi pi-wallet text-primary text-lg sm:text-xl"></i>
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="text-xs sm:text-sm text-muted-color">{{ 'PROFILE.DASHBOARD.TOTAL_SPENT' | translate }}</p>
+                <p class="text-xl sm:text-2xl font-bold text-color break-all">{{ formatPrice(stats().totalSpent) }}</p>
+              </div>
+            </div>
+          </p-card>
+
+        </div>
+
+        <!-- Recent Orders Section -->
+        <p-card class="shadow-sm">
+          <ng-template pTemplate="header">
+            <div class="flex items-center justify-between gap-2 p-3 sm:p-4 border-b border-surface">
+              <h3 class="font-semibold text-color text-sm sm:text-base">{{ 'PROFILE.DASHBOARD.RECENT_ORDERS' | translate }}</h3>
+              @if (hasOrders()) {
+                <p-button 
+                  [label]="'PROFILE.DASHBOARD.VIEW_ALL' | translate"
+                  icon="pi pi-arrow-right"
+                  iconPos="right"
+                  severity="secondary"
+                  [text]="true"
+                  size="small"
+                  (click)="navigateToOrders()"
+                  styleClass="text-xs sm:text-sm">
+                </p-button>
+              }
+            </div>
+          </ng-template>
+
+          <!-- Recent Orders List -->
+          @if (hasOrders()) {
+            <div class="space-y-3">
+              @for (order of recentOrders(); track order._id) {
+                <div 
+                  class="flex items-start sm:items-center gap-3 p-3 sm:p-4 border border-surface rounded-lg hover:border-primary transition-colors cursor-pointer"
+                  (click)="viewOrderDetails(order._id)">
+                  
+                  <!-- Order Icon -->
+                  <div class="w-10 h-10 sm:w-12 sm:h-12 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <i class="pi pi-shopping-bag text-primary text-lg sm:text-xl"></i>
+                  </div>
+
+                  <!-- Order Info -->
+                  <div class="flex-1 min-w-0">
+                    <div class="flex flex-wrap items-center gap-2 mb-1">
+                      <h4 class="font-semibold text-color text-sm sm:text-base">{{ 'PROFILE.DASHBOARD.ORDER_NUMBER' | translate: { number: order.id } }}</h4>
+                      <p-tag 
+                        [value]="getOrderStatusLabel(order)"
+                        [severity]="getOrderStatusSeverity(order)"
+                        styleClass="text-xs">
+                      </p-tag>
+                    </div>
+                    <p class="text-xs sm:text-sm text-muted-color">
+                      {{ order.cartItems.length }} {{ order.cartItems.length === 1 ? ('PROFILE.DASHBOARD.ITEMS_SINGULAR' | translate) : ('PROFILE.DASHBOARD.ITEMS_PLURAL' | translate) }} • {{ formatDate(order.createdAt) }}
+                    </p>
+                    <!-- Mobile: Show total inline -->
+                    <p class="text-sm font-semibold text-color mt-1 sm:hidden">
+                      {{ formatPrice(order.totalOrderPrice) }}
+                    </p>
+                  </div>
+
+                  <!-- Desktop: Order Total -->
+                  <div class="hidden sm:block text-right flex-shrink-0">
+                    <p class="text-xs text-muted-color">{{ 'PROFILE.DASHBOARD.TOTAL' | translate }}</p>
+                    <p class="font-semibold text-base sm:text-lg text-color whitespace-nowrap">{{ formatPrice(order.totalOrderPrice) }}</p>
+                  </div>
+
+                  <i class="pi pi-chevron-right text-muted-color flex-shrink-0 text-sm sm:text-base"></i>
+                </div>
+              }
+            </div>
+          } @else {
+            <div class="text-center py-8">
+              <i class="pi pi-shopping-bag text-5xl text-muted-color mb-4"></i>
+              <h3 class="text-lg font-semibold text-color mb-2">{{ 'PROFILE.DASHBOARD.NO_ORDERS' | translate }}</h3>
+              <p class="text-muted-color mb-4">{{ 'PROFILE.DASHBOARD.NO_ORDERS_MESSAGE' | translate }}</p>
+              <p-button 
+                [label]="'PROFILE.DASHBOARD.START_SHOPPING' | translate"
+                icon="pi pi-arrow-right"
+                iconPos="right"
+                severity="primary"
+                (click)="navigateToProducts()">
+              </p-button>
+            </div>
+          }
+        </p-card>
+
+        <!-- Quick Actions -->
+        <p-card class="shadow-sm">
+          <ng-template pTemplate="header">
+            <div class="p-3 sm:p-4 border-b border-surface">
+              <h3 class="font-semibold text-color text-sm sm:text-base">{{ 'PROFILE.DASHBOARD.QUICK_ACTIONS' | translate }}</h3>
+            </div>
+          </ng-template>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            
+            <p-button 
+              [label]="'PROFILE.DASHBOARD.BROWSE_PRODUCTS' | translate"
+              icon="pi pi-shopping-bag"
+              severity="secondary"
+              [outlined]="true"
+              (click)="navigateToProducts()"
+              styleClass="w-full h-12 sm:h-14 justify-center text-sm">
+            </p-button>
+
+            <p-button 
+              [label]="'PROFILE.DASHBOARD.VIEW_ORDERS' | translate"
+              icon="pi pi-box"
+              severity="secondary"
+              [outlined]="true"
+              (click)="navigateToOrders()"
+              styleClass="w-full h-12 sm:h-14 justify-center text-sm">
+            </p-button>
+
+            <p-button 
+              [label]="'PROFILE.DASHBOARD.MANAGE_ADDRESSES' | translate"
+              icon="pi pi-map-marker"
+              severity="secondary"
+              [outlined]="true"
+              (click)="navigateToAddresses()"
+              styleClass="w-full h-12 sm:h-14 justify-center text-sm">
+            </p-button>
+
+          </div>
+        </p-card>
+
+      </div>
+    }
+
+  </div>
+</div>
+

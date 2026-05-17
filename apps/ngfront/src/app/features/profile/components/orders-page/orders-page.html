@@ -1,0 +1,245 @@
+<!-- Orders Page - Pure PrimeNG + Tailwind CSS -->
+<div class="min-h-screen">
+
+  <!-- Page Header -->
+  <div class="border-b border-surface shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 py-6">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <i class="pi pi-receipt text-2xl text-primary"></i>
+          <h1 class="text-2xl font-bold text-color">
+            {{ 'PROFILE.ORDERS.TITLE' | translate }}
+          </h1>
+          @if (hasOrders()) {
+            <p-badge 
+              [value]="totalOrders()"
+              size="large">
+            </p-badge>
+          }
+        </div>
+        
+        <!-- Continue Shopping Button -->
+        <p-button 
+          [label]="'PROFILE.ORDERS.CONTINUE_SHOPPING' | translate"
+          severity="secondary"
+          [outlined]="true"
+          icon="pi pi-shopping-bag"
+          (click)="continueShopping()"
+          size="small">
+        </p-button>
+      </div>
+      
+      <!-- Statistics Cards -->
+      @if (hasOrders() && !loading()) {
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+          <p-card class="shadow-sm">
+            <div class="flex items-center gap-3">
+              <i class="pi pi-shopping-cart text-2xl text-primary"></i>
+              <div>
+                <p class="text-sm text-muted-color">{{ 'PROFILE.ORDERS.TOTAL_ORDERS' | translate }}</p>
+                <p class="text-2xl font-bold text-color">{{ totalOrders() }}</p>
+              </div>
+            </div>
+          </p-card>
+          
+          <p-card class="shadow-sm">
+            <div class="flex items-center gap-3">
+              <i class="pi pi-wallet text-2xl text-primary"></i>
+              <div>
+                <p class="text-sm text-muted-color">{{ 'PROFILE.ORDERS.TOTAL_SPENT' | translate }}</p>
+                <p class="text-2xl font-bold text-color">{{ formatPrice(totalSpent()) }}</p>
+              </div>
+            </div>
+          </p-card>
+          
+          <p-card class="shadow-sm">
+            <div class="flex items-center gap-3">
+              <i class="pi pi-box text-2xl text-primary"></i>
+              <div>
+                <p class="text-sm text-muted-color">{{ 'PROFILE.ORDERS.TOTAL_ITEMS' | translate }}</p>
+                <p class="text-2xl font-bold text-color">{{ totalItems() }}</p>
+              </div>
+            </div>
+          </p-card>
+        </div>
+      }
+    </div>
+  </div>
+
+  <div class="max-w-7xl mx-auto px-4 py-8">
+
+    <!-- Error Message -->
+    @if (error()) {
+      <div class="mb-6">
+        <p-message 
+          severity="error" 
+          [text]="error()"
+          [closable]="true"
+          (onClose)="clearError()">
+        </p-message>
+      </div>
+    }
+
+    <!-- Loading State -->
+    @if (showLoadingState()) {
+      <p-card>
+        <div class="space-y-4">
+          @for (i of [1,2,3]; track i) {
+            <div class="flex gap-4 p-4 border-b border-surface">
+              <p-skeleton width="100px" height="80px"></p-skeleton>
+              <div class="flex-1 space-y-2">
+                <p-skeleton width="60%" height="20px"></p-skeleton>
+                <p-skeleton width="40%" height="16px"></p-skeleton>
+                <p-skeleton width="80%" height="16px"></p-skeleton>
+              </div>
+              <p-skeleton width="100px" height="32px"></p-skeleton>
+            </div>
+          }
+        </div>
+      </p-card>
+    }
+
+    <!-- Empty State -->
+    @else if (showEmptyState()) {
+      <div class="flex flex-col items-center justify-center py-16 text-center">
+        <div class="bg-surface-100 rounded-full p-8 mb-6">
+          <i class="pi pi-receipt text-6xl text-muted-color"></i>
+        </div>
+        
+        <h2 class="text-2xl font-semibold text-color mb-2">
+          {{ 'PROFILE.ORDERS.NO_ORDERS_YET' | translate }}
+        </h2>
+        
+        <p class="text-muted-color mb-8 max-w-md">
+          {{ 'PROFILE.ORDERS.NO_ORDERS_MESSAGE' | translate }}
+        </p>
+        
+        <p-button 
+          [label]="'PROFILE.ORDERS.START_SHOPPING' | translate"
+          severity="primary"
+          icon="pi pi-shopping-bag"
+          (click)="continueShopping()"
+          size="large">
+        </p-button>
+      </div>
+    }
+
+    <!-- Orders List -->
+    @else if (hasOrders()) {
+      <div>
+        
+        <!-- Filter Buttons -->
+        <div class="flex flex-wrap gap-2 mb-6">
+          <p-button 
+            [label]="'PROFILE.ORDERS.ALL_ORDERS' | translate"
+            [severity]="filterType() === 'all' ? 'primary' : 'secondary'"
+            [outlined]="filterType() !== 'all'"
+            (click)="filterOrders('all')"
+            size="small">
+          </p-button>
+          <p-button 
+            [label]="'PROFILE.ORDERS.CASH_ORDERS' | translate"
+            [severity]="filterType() === 'cash' ? 'primary' : 'secondary'"
+            [outlined]="filterType() !== 'cash'"
+            icon="pi pi-wallet"
+            (click)="filterOrders('cash')"
+            size="small">
+          </p-button>
+          <p-button 
+            [label]="'PROFILE.ORDERS.CARD_PAYMENTS' | translate"
+            [severity]="filterType() === 'card' ? 'primary' : 'secondary'"
+            [outlined]="filterType() !== 'card'"
+            icon="pi pi-credit-card"
+            (click)="filterOrders('card')"
+            size="small">
+          </p-button>
+          <p-button 
+            [label]="'PROFILE.ORDERS.PENDING' | translate"
+            [severity]="filterType() === 'pending' ? 'primary' : 'secondary'"
+            [outlined]="filterType() !== 'pending'"
+            icon="pi pi-clock"
+            (click)="filterOrders('pending')"
+            size="small">
+          </p-button>
+          <p-button 
+            [label]="'PROFILE.ORDERS.DELIVERED' | translate"
+            [severity]="filterType() === 'delivered' ? 'primary' : 'secondary'"
+            [outlined]="filterType() !== 'delivered'"
+            icon="pi pi-check-circle"
+            (click)="filterOrders('delivered')"
+            size="small">
+          </p-button>
+        </div>
+        
+        <!-- Orders Table -->
+        <p-card>
+          <div class="space-y-0">
+            @for (summary of orderSummaries(); track trackByOrderId($index, filteredOrders()[$index])) {
+              <div class="flex flex-col lg:flex-row gap-4 p-4 border-b border-surface last:border-b-0 hover:bg-emphasis transition-colors">
+                
+                <!-- Order Info -->
+                <div class="flex-1 min-w-0">
+                  <!-- Order Number and Date -->
+                  <div class="flex items-center gap-2 mb-2">
+                    <h3 class="font-semibold text-color">
+                      Order #{{ summary.orderNumber }}
+                    </h3>
+                    <p-tag 
+                      [value]="summary.status"
+                      [severity]="getStatusSeverity(summary)"
+                      [rounded]="true">
+                    </p-tag>
+                  </div>
+                  
+                  <div class="text-sm text-muted-color space-y-1">
+                    <div class="flex items-center gap-2">
+                      <i class="pi pi-calendar text-xs"></i>
+                      <span>{{ summary.orderDate }}</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                      <i class="pi pi-box text-xs"></i>
+                      <span>{{ summary.totalItems }} {{ summary.totalItems === 1 ? ('PROFILE.ORDERS.ITEMS_SINGULAR' | translate) : ('PROFILE.ORDERS.ITEMS_PLURAL' | translate) }}</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                      <i class="pi pi-wallet text-xs"></i>
+                      <p-tag 
+                        [value]="summary.paymentMethod"
+                        [severity]="getPaymentMethodSeverity(filteredOrders()[$index].paymentMethodType)"
+                        [rounded]="true"
+                        size="small">
+                      </p-tag>
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- Price and Action -->
+                <div class="flex lg:flex-col items-center lg:items-end justify-between lg:justify-center gap-4">
+                  <div class="text-right">
+                    <p class="text-sm text-muted-color">{{ 'PROFILE.ORDERS.TOTAL' | translate }}</p>
+                    <p class="text-xl font-bold text-primary">
+                      {{ formatPrice(summary.totalPrice) }}
+                    </p>
+                  </div>
+                  
+                  <p-button 
+                    [label]="'PROFILE.ORDERS.VIEW_DETAILS' | translate"
+                    severity="secondary"
+                    [outlined]="true"
+                    icon="pi pi-arrow-right"
+                    iconPos="right"
+                    (click)="viewOrderDetails(summary.orderId)"
+                    size="small">
+                  </p-button>
+                </div>
+                
+              </div>
+            }
+          </div>
+        </p-card>
+        
+      </div>
+    }
+
+  </div>
+</div>
+

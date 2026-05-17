@@ -1,0 +1,167 @@
+<!-- Enhanced Brand List Page - Pure PrimeNG + Tailwind CSS -->
+<div class="min-h-screen">
+  
+  <!-- Compact Page Header -->
+  <div class="border-b border-surface shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 py-6">
+      
+      <!-- Title and Controls Row -->
+      <div class="flex flex-col lg:flex-row lg:items-center gap-6">
+        
+        <!-- Left: Title and Icon -->
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 bg-primary rounded-xl flex items-center justify-center">
+            <i class="pi pi-bookmark text-primary-contrast text-lg"></i>
+          </div>
+          <div>
+            <h1 class="text-2xl font-bold text-color">{{ 'BRANDS.LIST.TITLE' | translate }}</h1>
+            @if (!loading() && hasBrands()) {
+              <p class="text-sm text-muted-color">
+                {{ 'BRANDS.LIST.BRANDS_AVAILABLE' | translate: {count: totalBrands() | number} }}
+                @if (searchQuery()) {
+                  <span class="ml-1">{{ 'BRANDS.LIST.FOR_QUERY' | translate: {query: searchQuery()} }}</span>
+                }
+              </p>
+            }
+          </div>
+        </div>
+        
+        <!-- Right: Search Bar -->
+        <div class="flex-1 max-w-md">
+          <p-iconfield iconPosition="left" class="w-full">
+            <p-inputicon styleClass="pi pi-search" />
+            <input 
+              type="text" 
+              pInputText 
+              [placeholder]="'BRANDS.LIST.SEARCH_PLACEHOLDER' | translate"
+              [value]="searchQuery()"
+              (input)="onSearch($event)"
+              class="w-full"
+            />
+          </p-iconfield>
+        </div>
+        
+      </div>
+      
+    </div>
+  </div>
+  
+  <!-- Main Content -->
+  <div class="max-w-7xl mx-auto px-4 py-6">
+    
+    <!-- Loading State -->
+    @if (loading() && !hasBrands()) {
+      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+        @for (i of [1,2,3,4,5,6,7,8,9,10,11,12]; track i) {
+          <p-card class="shadow-sm">
+            <p-skeleton shape="circle" size="5rem" styleClass="mb-3 mx-auto block"></p-skeleton>
+            <p-skeleton width="100%" height="1rem" styleClass="mb-2"></p-skeleton>
+            <p-skeleton width="60%" height="0.75rem" styleClass="mx-auto"></p-skeleton>
+          </p-card>
+        }
+      </div>
+    }
+    
+    <!-- Error State -->
+    @else if (error() && !loading()) {
+      <div class="flex justify-center items-center py-12">
+        <div class="text-center max-w-md">
+          <p-message severity="error" styleClass="mb-4 block">
+            {{ error() }}
+          </p-message>
+          <p-button 
+            [label]="'BRANDS.DETAILS.RETRY' | translate" 
+            icon="pi pi-refresh" 
+            (click)="retry()"
+            severity="secondary">
+          </p-button>
+        </div>
+      </div>
+    }
+    
+    <!-- Brands Grid -->
+    @else if (hasBrands()) {
+      <div>
+        <!-- Grid Container -->
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 mb-6">
+          @for (brand of brands(); track brand._id) {
+              <div 
+              class="group relative overflow-hidden rounded-xl border border-surface shadow-sm hover:shadow-xl hover:border-primary transition-all duration-300 cursor-pointer"
+              (click)="navigateToBrand(brand)"
+              [attr.aria-label]="'BRANDS.LIST.VIEW_BRAND_ARIA' | translate: {name: brand.name}">
+              
+              <!-- Brand Logo -->
+              <div class="relative aspect-square flex items-center justify-center bg-surface-100 rounded-lg overflow-hidden p-4">
+                <img 
+                  [src]="brand.image" 
+                  [alt]="brand.name"
+                  class="w-full h-full object-contain group-hover:scale-110 transition-transform duration-300"
+                />
+              </div>
+              
+              <!-- Brand Info -->
+              <div class="text-center p-4">
+                <h3 class="font-semibold text-color text-sm mb-1 line-clamp-1 group-hover:text-primary transition-colors">
+                  {{ brand.name }}
+                </h3>
+                <p class="text-xs text-muted-color">
+                  {{ 'BRANDS.LIST.VIEW_PRODUCTS_LINK' | translate }}
+                </p>
+              </div>
+            </div>
+          }
+        </div>
+        
+        <!-- Pagination -->
+        @if (totalPages() > 1) {
+          <div class="mt-12 border-t border-surface pt-8">
+            <div class="flex flex-col items-center gap-4">
+              <p-paginator
+                [rows]="itemsPerPage()"
+                [totalRecords]="totalBrands()"
+                [first]="(currentPage() - 1) * itemsPerPage()"
+                (onPageChange)="onPageChange($event)"
+                [showCurrentPageReport]="true"
+                [currentPageReportTemplate]="'BRANDS.LIST.PAGINATION_TEMPLATE' | translate"
+                [showJumpToPageDropdown]="false"
+                [showFirstLastIcon]="true"
+                [showPageLinks]="true"
+                ariaLabel="Brand list pagination navigation"
+                class="bg-transparent border-0">
+              </p-paginator>
+            </div>
+          </div>
+        }
+      </div>
+    }
+    
+    <!-- Empty State -->
+    @else if (!loading() && !error()) {
+      <div class="flex justify-center items-center py-12">
+        <div class="text-center max-w-md">
+          <i class="pi pi-bookmark text-6xl text-muted-color mb-4"></i>
+          <h3 class="text-xl font-semibold text-color mb-2">
+            {{ 'BRANDS.LIST.NO_BRANDS_FOUND' | translate }}
+          </h3>
+          <p class="text-muted-color mb-4">
+            @if (searchQuery()) {
+              {{ 'BRANDS.LIST.NO_SEARCH_RESULTS' | translate: {query: searchQuery()} }}
+            } @else {
+              {{ 'BRANDS.LIST.NO_BRANDS_AVAILABLE' | translate }}
+            }
+          </p>
+          @if (searchQuery()) {
+            <p-button 
+              [label]="'BRANDS.LIST.CLEAR_SEARCH' | translate" 
+              icon="pi pi-times" 
+              (click)="clearSearch()"
+              severity="secondary">
+            </p-button>
+          }
+        </div>
+      </div>
+    }
+    
+  </div>
+  
+</div>

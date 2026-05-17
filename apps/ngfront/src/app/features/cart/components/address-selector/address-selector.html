@@ -1,0 +1,133 @@
+<p-card>
+  <ng-template pTemplate="header">
+    <div class="flex items-center gap-3 p-4 bg-emphasis">
+      <i class="pi pi-map-marker text-primary"></i>
+      <h3 class="font-semibold text-color">{{ 'ADDRESS.SELECTOR_TITLE' | translate }}</h3>
+    </div>
+  </ng-template>
+  
+  <!-- Loading State -->
+  @if (loading()) {
+    <div class="space-y-4">
+      @for (i of [1,2]; track i) {
+        <div class="border border-surface rounded-lg p-4">
+          <div class="flex items-start gap-3">
+            <p-skeleton width="20px" height="20px" shape="circle"></p-skeleton>
+            <div class="flex-1 space-y-2">
+              <p-skeleton width="40%" height="1rem"></p-skeleton>
+              <p-skeleton width="80%" height="0.875rem"></p-skeleton>
+              <p-skeleton width="60%" height="0.875rem"></p-skeleton>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  }
+  
+  <!-- Error State -->
+  @else if (error()) {
+    <p-message 
+      severity="warn" 
+      [text]="error()"
+      class="mb-4">
+    </p-message>
+  }
+  
+  <!-- Saved Addresses + New Address Option -->
+  @else {
+    <div class="space-y-4">
+      
+      <!-- Existing Addresses -->
+      @if (hasAddresses()) {
+        @for (address of addresses(); track address._id) {
+          <div 
+            class="address-option border rounded-lg p-4 cursor-pointer transition-all duration-200"
+            [class.border-primary]="isAddressSelected(address._id)"
+            [class.bg-primary/10]="isAddressSelected(address._id)"
+            [class.border-surface]="!isAddressSelected(address._id)"
+            [class.hover:border-primary/50]="!isAddressSelected(address._id) && !isDisabled()"
+            [class.pointer-events-none]="isDisabled()"
+            [class.opacity-50]="isDisabled()"
+            (click)="selectExistingAddress(address)"
+            role="button"
+            tabindex="0"
+            (keydown.enter)="selectExistingAddress(address)"
+            (keydown.space)="selectExistingAddress(address)"
+            [attr.aria-pressed]="isAddressSelected(address._id)"
+            [attr.aria-label]="'ADDRESS.SELECT_ADDRESS_ARIA' | translate: { name: address.name }">
+            
+            <div class="flex items-start gap-3">
+              <!-- Radio Button -->
+              <div class="pt-1">
+                <p-radiobutton 
+                  [value]="address._id"
+                  [ngModel]="selectedAddressId()"
+                  [disabled]="isDisabled()"
+                  [inputId]="'address-' + address._id">
+                </p-radiobutton>
+              </div>
+              
+              <!-- Address Details -->
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-2 mb-2">
+                  <label 
+                    [for]="'address-' + address._id" 
+                    class="font-medium text-color cursor-pointer">
+                    {{ address.name }}
+                  </label>
+                </div>
+                
+                <div class="text-sm text-muted-color space-y-1">
+                  <p class="line-clamp-2">{{ address.details }}</p>
+                  <p>{{ address.city }}</p>
+                  <p class="flex items-center gap-2">
+                    <i class="pi pi-phone text-xs"></i>
+                    {{ address.phone }}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        }
+      }
+      
+      <!-- "Add New Address" Option -->
+      <div 
+        class="address-option border rounded-lg p-4 cursor-pointer transition-all duration-200"
+        [class.border-primary]="isNewAddressSelected()"
+        [class.bg-primary/10]="isNewAddressSelected()"
+        [class.border-surface]="!isNewAddressSelected()"
+        [class.hover:border-primary/50]="!isNewAddressSelected() && !isDisabled()"
+        [class.pointer-events-none]="isDisabled()"
+        [class.opacity-50]="isDisabled()"
+        (click)="selectNewAddress()"
+        role="button"
+        tabindex="0"
+        (keydown.enter)="selectNewAddress()"
+        (keydown.space)="selectNewAddress()"
+        [attr.aria-pressed]="isNewAddressSelected()"
+        [attr.aria-label]="'ADDRESS.ADD_NEW_ADDRESS' | translate">
+        
+        <div class="flex items-center gap-3">
+          <!-- Radio Button -->
+          <p-radiobutton 
+            value="new"
+            [ngModel]="selectedType()"
+            [disabled]="isDisabled()"
+            inputId="address-new">
+          </p-radiobutton>
+          
+          <!-- Label -->
+          <div class="flex items-center gap-2">
+            <i class="pi pi-plus text-primary" aria-hidden="true"></i>
+            <label for="address-new" class="font-medium text-color cursor-pointer">
+              {{ hasAddresses() ? ('ADDRESS.USE_DIFFERENT_ADDRESS' | translate) : ('ADDRESS.ADD_SHIPPING_ADDRESS' | translate) }}
+            </label>
+          </div>
+        </div>
+      </div>
+      
+    </div>
+  }
+</p-card>
+

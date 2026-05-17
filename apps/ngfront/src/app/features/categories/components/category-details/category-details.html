@@ -1,0 +1,202 @@
+<!-- Enhanced Category Details Page - Pure PrimeNG + Tailwind CSS -->
+<div class="min-h-screen">
+  
+  <!-- Loading State - Compact -->
+  @if (loading() && !category()) {
+    <div class="border-b border-surface shadow-sm">
+      <div class="max-w-7xl mx-auto px-4 py-4">
+        <!-- Breadcrumb Skeleton -->
+        <p-skeleton width="250px" height="1rem" styleClass="mb-3"></p-skeleton>
+        
+        <!-- Compact Header Skeleton -->
+        <div class="flex items-center gap-4">
+          <p-skeleton shape="circle" size="4rem"></p-skeleton>
+          <div class="flex-1">
+            <p-skeleton width="40%" height="1.5rem" styleClass="mb-2"></p-skeleton>
+            <p-skeleton width="30%" height="0.875rem"></p-skeleton>
+          </div>
+          <p-skeleton width="150px" height="2rem" styleClass="rounded"></p-skeleton>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Subcategories Skeleton -->
+    <div class="py-6">
+      <div class="max-w-7xl mx-auto px-4">
+        <p-skeleton width="150px" height="1.25rem" styleClass="mb-4"></p-skeleton>
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+          @for (item of [1,2,3,4,5,6]; track item) {
+            <p-skeleton height="5rem" styleClass="rounded-lg"></p-skeleton>
+          }
+        </div>
+      </div>
+    </div>
+    
+    <!-- Products Skeleton -->
+    <div class="py-6">
+      <div class="max-w-7xl mx-auto px-4">
+        <p-skeleton width="200px" height="1.25rem" styleClass="mb-4"></p-skeleton>
+        <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3 sm:gap-4">
+          @for (item of [1,2,3,4,5,6]; track item) {
+            <p-card class="shadow-sm h-96">
+              <p-skeleton height="10rem" styleClass="mb-3 rounded-lg"></p-skeleton>
+              <p-skeleton width="90%" height="0.875rem" styleClass="mb-2"></p-skeleton>
+              <p-skeleton width="60%" height="1rem"></p-skeleton>
+            </p-card>
+          }
+        </div>
+      </div>
+    </div>
+  }
+  
+  <!-- Error State -->
+  @else if (error()) {
+    <div class="py-12">
+      <div class="max-w-lg mx-auto px-4 text-center">
+        <p-card class="shadow-sm">
+          <div class="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-6">
+            <i class="pi pi-exclamation-triangle text-2xl text-red-600"></i>
+          </div>
+          <h2 class="text-xl font-bold text-color mb-4">{{ 'CATEGORIES.DETAILS.NOT_FOUND' | translate }}</h2>
+          <p-message
+            severity="error"
+            class="mb-6 text-left">
+            {{ error() }}
+          </p-message>
+          <div class="flex flex-col sm:flex-row gap-3 justify-center">
+            <p-button
+              [label]="'CATEGORIES.DETAILS.RETRY' | translate"
+              icon="pi pi-refresh"
+              (click)="retryLoading()"
+              severity="primary"
+              [outlined]="true">
+            </p-button>
+            <p-button
+              [label]="'CATEGORIES.DETAILS.BACK_TO_CATEGORIES' | translate"
+              icon="pi pi-arrow-left"
+              routerLink="/categories"
+              severity="primary">
+            </p-button>
+          </div>
+        </p-card>
+      </div>
+    </div>
+  }
+  
+  <!-- Category Content -->
+  @else if (category()) {
+    <div>
+      
+      <!-- Compact Header with Breadcrumb and Category Info -->
+      <div class="border-b border-surface shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 py-4">
+          
+          <!-- Breadcrumb -->
+          <div class="mb-3">
+            <p-breadcrumb 
+              [model]="breadcrumbItems()" 
+              [home]="{icon: 'pi pi-home', routerLink: '/', label: ('NAVIGATION.CATEGORIES' | translate)}"
+              [style]="{'background': 'transparent', 'border': 'none', 'padding': '0'}"
+              class="!bg-transparent">
+            </p-breadcrumb>
+          </div>
+          
+          <!-- Compact Category Header -->
+          <div class="flex items-center gap-4">
+            <!-- Category Image - Smaller and circular -->
+            <div class="w-16 h-16 flex-shrink-0">
+              <img 
+                [src]="category()!.image" 
+                [alt]="category()!.name"
+                class="w-full h-full object-cover rounded-full border-2 border-surface">
+            </div>
+            
+            <!-- Category Info - Single Line -->
+            <div class="flex-1 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <div>
+                <h1 class="text-2xl font-bold text-color">
+                  {{ category()!.name }}
+                </h1>
+                <p class="text-sm text-muted-color">
+                  {{ 'CATEGORIES.DETAILS.EXPLORE_SELECTION' | translate }}
+                </p>
+              </div>
+              
+              <p-button
+                [label]="'CATEGORIES.DETAILS.VIEW_ALL_PRODUCTS' | translate"
+                icon="pi pi-shopping-bag"
+                (click)="viewAllProducts()"
+                severity="primary"
+                size="small">
+              </p-button>
+            </div>
+          </div>
+          
+        </div>
+      </div>
+      
+      <!-- Subcategories Section - Compact -->
+      @if (hasSubcategories()) {
+        <div class="py-6">
+          <div class="max-w-7xl mx-auto px-4">
+            <h2 class="text-lg font-bold text-color mb-4 flex items-center gap-2">
+              <i class="pi pi-th-large text-primary"></i>
+              {{ 'CATEGORIES.DETAILS.SUBCATEGORIES' | translate }}
+            </h2>
+            
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+              @for (subcategory of subcategories(); track subcategory._id) {
+                <button
+                  type="button"
+                  class="group flex flex-col items-center gap-2 p-3 rounded-lg border border-surface hover:border-primary hover:shadow-md transition-all duration-200 cursor-pointer"
+                  (click)="navigateToSubcategory(subcategory)"
+                  [attr.aria-label]="'CATEGORIES.DETAILS.VIEW_SUBCATEGORY_ARIA' | translate: {name: subcategory.name}">
+                  
+                  <div class="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <i class="pi pi-tag text-lg text-primary"></i>
+                  </div>
+                  <span class="text-xs font-medium text-color text-center line-clamp-2">
+                    {{ subcategory.name }}
+                  </span>
+                </button>
+              }
+            </div>
+          </div>
+        </div>
+      }
+      
+      <!-- Products in This Category - Using Product Card Component -->
+      @if (hasProducts()) {
+        <div class="py-6">
+          <div class="max-w-7xl mx-auto px-4">
+            
+            <div class="flex items-center justify-between mb-4">
+              <h2 class="text-lg font-bold text-color flex items-center gap-2">
+                <i class="pi pi-star-fill text-yellow-500"></i>
+                {{ 'CATEGORIES.DETAILS.FEATURED_PRODUCTS' | translate }}
+              </h2>
+              <p-button
+                [label]="'CATEGORIES.DETAILS.VIEW_ALL' | translate"
+                icon="pi pi-arrow-right"
+                iconPos="right"
+                (click)="viewAllProducts()"
+                severity="secondary"
+                [text]="true"
+                size="small">
+              </p-button>
+            </div>
+            
+            <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3 sm:gap-4">
+              @for (product of products(); track product._id) {
+                <app-product-card [product]="product"></app-product-card>
+              }
+            </div>
+            
+          </div>
+        </div>
+      }
+      
+    </div>
+  }
+  
+</div>

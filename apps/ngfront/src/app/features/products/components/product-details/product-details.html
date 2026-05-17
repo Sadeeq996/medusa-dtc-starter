@@ -1,0 +1,380 @@
+<!-- Enhanced Product Details Page - Mobile-First Compact Design with PrimeNG + Tailwind CSS -->
+<div class="min-h-screen">
+  
+  <!-- Loading State -->
+  @if (loading() && !product()) {
+    <div class="max-w-6xl mx-auto px-3 md:px-4 py-4 md:py-6">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-8">
+        
+        <!-- Image Gallery Skeleton -->
+        <p-card class="shadow-sm">
+          <p-skeleton height="20rem" class="mb-3 rounded-lg"></p-skeleton>
+          <div class="flex gap-2 justify-center">
+            @for (item of [1,2,3,4]; track item) {
+              <p-skeleton width="4rem" height="3rem" class="rounded"></p-skeleton>
+            }
+          </div>
+        </p-card>
+        
+        <!-- Product Info Skeleton -->
+        <p-card class="shadow-sm">
+          <div class="space-y-4">
+            <div class="space-y-2">
+              <p-skeleton width="40%" height="1rem"></p-skeleton>
+              <p-skeleton width="85%" height="2rem"></p-skeleton>
+            </div>
+            <p-skeleton width="60%" height="1.25rem"></p-skeleton>
+            <div class="space-y-2">
+              <p-skeleton width="70%" height="1.5rem"></p-skeleton>
+              <p-skeleton width="50%" height="1rem"></p-skeleton>
+            </div>
+            <p-skeleton width="100%" height="4rem"></p-skeleton>
+            <div class="flex flex-col sm:flex-row gap-3">
+              <p-skeleton width="6rem" height="2.5rem" class="rounded"></p-skeleton>
+              <p-skeleton width="10rem" height="2.5rem" class="rounded flex-1"></p-skeleton>
+            </div>
+          </div>
+        </p-card>
+        
+      </div>
+    </div>
+  }
+  
+  <!-- Error State -->
+  @else if (error()) {
+    <div class="py-8 md:py-12">
+      <div class="max-w-lg mx-auto px-3 md:px-4 text-center">
+        <p-card class="shadow-sm">
+          <div class="w-14 h-14 md:w-16 md:h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4 md:mb-6">
+            <i class="pi pi-exclamation-triangle text-xl md:text-2xl text-red-600"></i>
+          </div>
+          <h2 class="text-lg md:text-xl font-bold text-color mb-3 md:mb-4">{{ 'PRODUCTS.DETAILS.NOT_FOUND' | translate }}</h2>
+          <p-message
+            severity="error"
+            [text]="error()"
+            class="mb-4 md:mb-6 text-left text-sm">
+          </p-message>
+          <div class="flex flex-col sm:flex-row gap-2 md:gap-3 justify-center">
+            <p-button
+              [label]="'PRODUCTS.DETAILS.TRY_AGAIN' | translate"
+              icon="pi pi-refresh"
+              (click)="retryLoading()"
+              severity="primary"
+              [outlined]="true"
+              size="small"
+              class="w-full sm:w-auto">
+            </p-button>
+            <p-button
+              [label]="'PRODUCTS.DETAILS.BACK_TO_PRODUCTS' | translate"
+              icon="pi pi-arrow-left"
+              routerLink="/products/list"
+              severity="primary"
+              size="small"
+              class="w-full sm:w-auto">
+            </p-button>
+          </div>
+        </p-card>
+      </div>
+    </div>
+  }
+  
+  <!-- Product Content -->
+  @else if (product()) {
+    <div>
+      
+      <!-- Breadcrumb Navigation -->
+      <div class="border-b border-surface">
+        <div class="max-w-6xl mx-auto px-3 md:px-4 py-3 md:py-4">
+          <p-breadcrumb 
+            [model]="breadcrumbItems()" 
+            [home]="{icon: 'pi pi-home', routerLink: '/'}"
+            [style]="{'background': 'transparent', 'border': 'none', 'padding': '0'}"
+            class="!bg-transparent text-xs md:text-sm whitespace-nowrap">
+          </p-breadcrumb>
+        </div>
+      </div>
+      
+      <!-- Main Product Section -->
+      <div class="py-3 md:py-4">
+        <div class="max-w-6xl mx-auto px-3 md:px-4">
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6 items-stretch">
+            
+            <!-- Product Image Gallery -->
+            <div class="flex flex-col">
+              @if (galleryImages().length > 0) {
+                <p-card class="shadow-sm h-full">
+                  <p-galleria
+                    [value]="galleryImages()"
+                    [responsiveOptions]="[
+                      {breakpoint: '1024px', numVisible: 4},
+                      {breakpoint: '768px', numVisible: 3},
+                      {breakpoint: '560px', numVisible: 2}
+                    ]"
+                    [numVisible]="4"
+                    [showThumbnails]="galleryImages().length > 1"
+                    [showIndicators]="true"
+                    [showIndicatorsOnItem]="true"
+                    [indicatorsPosition]="'bottom'"
+                    [thumbnailsPosition]="'bottom'"
+                    [circular]="true"
+                    [autoPlay]="false"
+                    [transitionInterval]="4000"
+                    class="rounded-lg overflow-hidden">
+                    
+                    <ng-template #item let-image>
+                      <div class="flex items-center justify-center rounded-lg overflow-hidden">
+                        <img 
+                          [src]="image.itemImageSrc" 
+                          [alt]="image.alt"
+                          class="w-full h-64 sm:h-72 md:h-80 lg:h-72 object-cover rounded-lg transition-transform duration-300 hover:scale-105" />
+                      </div>
+                    </ng-template>
+                    
+                    <ng-template #thumbnail let-image>
+                      <div class="p-0.5 md:p-1">
+                        <img 
+                          [src]="image.thumbnailImageSrc" 
+                          [alt]="image.alt"
+                          class="w-10 h-10 md:w-12 md:h-12 object-cover rounded border-2 border-transparent hover:border-primary transition-all duration-200 cursor-pointer" />
+                      </div>
+                    </ng-template>
+                    
+                  </p-galleria>
+                </p-card>
+              }
+            </div>
+            
+            <!-- Product Information -->
+            <p-card class="shadow-sm h-full flex flex-col space-y-3 md:space-y-4">
+              
+              <!-- Category and Brand Tags -->
+              <div class="flex flex-wrap gap-1.5 md:gap-2">
+                <p-chip
+                  [label]="product()!.category.name"
+                  icon="pi pi-tag"
+                  (click)="navigateToCategory()"
+                  class="cursor-pointer transition-colors text-xs md:text-sm">
+                </p-chip>
+                <p-chip
+                  [label]="product()!.brand.name"
+                  icon="pi pi-star"
+                  (click)="navigateToBrand()"
+                  class="cursor-pointer transition-colors text-xs md:text-sm">
+                </p-chip>
+              </div>
+              
+              <!-- Product Title -->
+              <div>
+                <h1 class="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-color leading-tight">
+                  {{ product()!.title }}
+                </h1>
+              </div>
+              
+              <!-- Rating and Reviews -->
+              @if (product()!.ratingsAverage > 0) {
+                <div class="flex items-center gap-2 p-1 md:p-2 rounded">
+                  <p-rating
+                    [ngModel]="product()!.ratingsAverage"
+                    [readonly]="true"
+                    [stars]="5"
+                    class="text-xs md:text-sm">
+                  </p-rating>
+                  <div class="flex items-center gap-1 text-xs text-muted-color">
+                    <span class="font-medium">{{ product()!.ratingsAverage }}/5</span>
+                    <span>•</span>
+                    <span>{{ getRatingDisplay() }} reviews</span>
+                  </div>
+                </div>
+              }
+              
+              <!-- Price Section -->
+              <div class="price-section">
+                <div class="flex items-center gap-1.5 md:gap-2 mb-1 flex-wrap">
+                  <span class="current-price text-lg sm:text-xl md:text-2xl font-bold text-primary">
+                    {{ formatPrice(currentPrice()) }}
+                  </span>
+                  @if (isOnSale()) {
+                    <span class="original-price text-sm md:text-base text-muted-color line-through">
+                      {{ formatPrice(product()!.price) }}
+                    </span>
+                    <p-badge 
+                      [value]="'-' + discountPercentage() + '%'"
+                      size="small"
+                      class="text-xs">
+                    </p-badge>
+                  }
+                </div>
+                
+                <!-- Stock Status and Sales Info -->
+                <div class="stock-status flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-2">
+                  <div>
+                    @if (isInStock()) {
+                      <span class="text-primary text-xs font-medium">
+                        <i class="pi pi-check mr-1"></i>
+                        {{ 'PRODUCTS.DETAILS.IN_STOCK_COUNT' | translate: {count: product()!.quantity} }}
+                      </span>
+                    } @else {
+                      <span class="text-red-500 text-xs font-medium">
+                        <i class="pi pi-times mr-1"></i>
+                        {{ 'PRODUCTS.DETAILS.OUT_OF_STOCK' | translate }}
+                      </span>
+                    }
+                  </div>
+                  @if (product()!.sold > 0) {
+                    <span class="text-xs text-muted-color">
+                      <i class="pi pi-shopping-bag mr-1"></i>
+                      {{ 'PRODUCTS.DETAILS.SOLD_COUNT' | translate: {count: product()!.sold} }}
+                    </span>
+                  }
+                </div>
+              </div>
+              
+              <!-- Product Description -->
+              <div class="description-section">
+                <h3 class="text-xs md:text-sm font-semibold text-color mb-1">
+                  {{ 'PRODUCTS.DETAILS.DESCRIPTION' | translate }}
+                </h3>
+                <div class="description-content text-xs text-muted-color leading-relaxed line-clamp-3 md:line-clamp-none">
+                  {{ product()!.description }}
+                </div>
+              </div>
+              
+              <!-- Spacer to push buttons to bottom -->
+              <div class="flex-1"></div>
+              
+              <!-- Quantity and Add to Cart -->
+              @if (isInStock()) {
+                <div class="purchase-section mt-auto">
+                  
+                  <!-- Quantity Selector -->
+                  <div class="quantity-section mb-2 md:mb-3">
+                    <label class="block text-xs font-medium text-color mb-1.5">
+                      {{ 'PRODUCTS.DETAILS.QUANTITY' | translate }}
+                    </label>
+                    <div class="quantity-controls flex items-center gap-2">
+                      <p-button
+                        icon="pi pi-minus"
+                        [disabled]="quantity() <= 1"
+                        (click)="decreaseQuantity()"
+                        severity="secondary"
+                        [outlined]="true"
+                        size="small"
+                        class="min-w-[2.5rem] h-10">
+                      </p-button>
+                      
+                      <span class="quantity-display text-sm md:text-base font-semibold px-3 md:px-4 py-2 rounded min-w-[3rem] text-center border border-surface">
+                        {{ quantity() }}
+                      </span>
+                      
+                      <p-button
+                        icon="pi pi-plus"
+                        [disabled]="quantity() >= maxQuantity()"
+                        (click)="increaseQuantity()"
+                        severity="secondary"
+                        [outlined]="true"
+                        size="small"
+                        class="min-w-[2.5rem] h-10">
+                      </p-button>
+                    </div>
+                  </div>
+                  
+                  <!-- Action Buttons -->
+                  <div class="action-buttons space-y-2 md:space-y-3">
+                    
+                    <!-- Cart Status Display -->
+                    @if (isInCart()) {
+                      <p-message
+                        severity="success"
+                        icon="pi pi-check-circle"
+                        size="small"
+                        styleClass="mb-3">
+                        {{ cartQuantity() === 1 ? ('PRODUCTS.DETAILS.CART_STATUS_SINGULAR' | translate) : ('PRODUCTS.DETAILS.CART_STATUS_PLURAL' | translate: {count: cartQuantity()}) }}
+                      </p-message>
+                    }
+                    
+                    <!-- Add to Cart Button and Wishlist -->
+                    <div class="flex flex-row gap-2">
+                      <p-button
+                        [label]="isInCart() ? ('PRODUCTS.ADD_MORE' | translate) : ('PRODUCTS.ADD_TO_CART' | translate)"
+                        icon="pi pi-shopping-cart"
+                        [disabled]="!canAddToCart()"
+                        [loading]="isAddingToCart()"
+                        (click)="addToCart()"
+                        severity="primary"
+                        size="small"
+                        class="flex-1 !h-11 !text-sm md:!text-base">
+                      </p-button>
+                      
+                      <p-button
+                        icon="pi pi-heart"
+                        (click)="addToWishlist()"
+                        severity="secondary"
+                        [outlined]="true"
+                        size="small"
+                        class="!w-11 !h-11"
+                        [ariaLabel]="'PRODUCTS.DETAILS.ADD_TO_WISHLIST_ARIA' | translate">
+                      </p-button>
+                    </div>
+                  </div>
+                  
+                </div>
+              }
+              
+              
+            </p-card>
+            
+          </div>
+        </div>
+      </div>
+      
+      <!-- Related Products Section -->
+      @if (relatedProducts().length > 0 || relatedLoading()) {
+        <div class="related-products-section py-6 md:py-8 border-t border-surface">
+          <div class="max-w-6xl mx-auto px-3 md:px-4">
+            
+            <h2 class="text-lg md:text-xl font-bold text-color mb-4 md:mb-6 text-center">
+              {{ 'PRODUCTS.DETAILS.RELATED_PRODUCTS' | translate }}
+            </h2>
+            
+            @if (relatedLoading()) {
+              <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
+                @for (item of [1,2,3,4,5,6,7,8]; track item) {
+                  <p-card class="product-skeleton-card">
+                    <p-skeleton height="120px" class="mb-3"></p-skeleton>
+                    <p-skeleton width="80%" height="0.75rem" class="mb-2"></p-skeleton>
+                    <p-skeleton width="60%" height="0.75rem"></p-skeleton>
+                  </p-card>
+                }
+              </div>
+            } @else {
+              <p-carousel
+                [value]="relatedProducts()"
+                [numVisible]="4"
+                [numScroll]="2"
+                [responsiveOptions]="[
+                  {breakpoint: '1280px', numVisible: 4, numScroll: 2},
+                  {breakpoint: '1024px', numVisible: 3, numScroll: 1},
+                  {breakpoint: '768px', numVisible: 2, numScroll: 1},
+                  {breakpoint: '560px', numVisible: 1.5, numScroll: 1}
+                ]"
+                [circular]="true"
+                [autoplayInterval]="5000"
+                class="related-products-carousel">
+                
+                <ng-template #item let-product>
+                  <div class="carousel-item-wrapper px-1.5 md:px-2">
+                    <app-product-card [product]="product"></app-product-card>
+                  </div>
+                </ng-template>
+                
+              </p-carousel>
+            }
+            
+          </div>
+        </div>
+      }
+      
+    </div>
+  }
+  
+</div>

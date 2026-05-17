@@ -1,0 +1,170 @@
+<!-- Enhanced Brand Details Page - Pure PrimeNG + Tailwind CSS -->
+<div class="min-h-screen">
+  
+  <!-- Loading State -->
+  @if (loading() && !brand()) {
+    <div class="max-w-7xl mx-auto px-4 py-6 space-y-6">
+      
+      <!-- Breadcrumb Skeleton -->
+      <p-skeleton width="250px" height="1.5rem"></p-skeleton>
+      
+      <!-- Brand Header Skeleton -->
+      <p-card class="shadow-sm">
+        <div class="flex items-center gap-6">
+          <p-skeleton shape="circle" size="4rem"></p-skeleton>
+          <div class="flex-1">
+            <p-skeleton width="60%" height="2rem" styleClass="mb-3"></p-skeleton>
+            <p-skeleton width="40%" height="1rem"></p-skeleton>
+          </div>
+        </div>
+      </p-card>
+      
+      <!-- Products Skeleton -->
+      <div class="py-6">
+        <div class="max-w-7xl mx-auto px-4">
+          <p-skeleton width="150px" height="1.5rem" styleClass="mb-4"></p-skeleton>
+          <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+            @for (i of [1,2,3,4,5,6]; track i) {
+              <p-card class="shadow-sm h-64">
+                <p-skeleton width="100%" height="150px" styleClass="mb-3"></p-skeleton>
+                <p-skeleton width="100%" height="1rem" styleClass="mb-2"></p-skeleton>
+                <p-skeleton width="60%" height="0.75rem"></p-skeleton>
+              </p-card>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+  
+  <!-- Error State -->
+  @else if (error() && !loading()) {
+    <div class="max-w-7xl mx-auto px-4 py-12">
+      <div class="flex justify-center items-center">
+        <div class="text-center max-w-md">
+          <p-message severity="error" styleClass="mb-4 block">
+            {{ error() }}
+          </p-message>
+          <p-button 
+            [label]="'BRANDS.DETAILS.RETRY' | translate" 
+            icon="pi pi-refresh" 
+            (click)="retry()"
+            severity="secondary">
+          </p-button>
+        </div>
+      </div>
+    </div>
+  }
+  
+  <!-- Brand Content -->
+  @else if (brand()) {
+    <div>
+      
+      <!-- Breadcrumb Navigation -->
+      <div class="border-b border-surface">
+        <div class="max-w-7xl mx-auto px-4 py-4">
+          <p-breadcrumb 
+            [model]="breadcrumbItems()" 
+            [home]="{icon: 'pi pi-home', routerLink: '/', label: ('NAVIGATION.BRANDS' | translate)}"
+            [style]="{'background': 'transparent', 'border': 'none', 'padding': '0'}"
+            class="!bg-transparent">
+          </p-breadcrumb>
+        </div>
+      </div>
+      
+      <!-- Brand Header Section - Compact Design -->
+      <div class="border-b border-surface shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 py-6">
+          <div class="flex items-center gap-6">
+            
+            <!-- Brand Logo - Circular, Compact -->
+            <div class="flex-shrink-0">
+              <div class="w-16 h-16 rounded-full bg-surface-100 border-2 border-primary/20 flex items-center justify-center overflow-hidden shadow-md">
+                <img 
+                  [src]="brand()!.image" 
+                  [alt]="brand()!.name"
+                  class="w-full h-full object-contain p-2"
+                />
+              </div>
+            </div>
+            
+            <!-- Brand Info -->
+            <div class="flex-1 min-w-0">
+              <h1 class="text-2xl font-bold text-color mb-1">
+                {{ brand()!.name }}
+              </h1>
+              <p class="text-sm text-muted-color">
+                {{ 'BRANDS.DETAILS.DISCOVER' | translate: {name: brand()!.name} }}
+              </p>
+            </div>
+            
+            <!-- View All Button -->
+            <div class="flex-shrink-0 hidden sm:block">
+              <p-button
+                [label]="'BRANDS.DETAILS.VIEW_ALL_PRODUCTS' | translate"
+                icon="pi pi-arrow-right"
+                iconPos="right"
+                (click)="viewAllProducts()"
+                severity="secondary"
+                [outlined]="true">
+              </p-button>
+            </div>
+            
+          </div>
+          
+          <!-- Mobile View All Button -->
+          <div class="mt-4 sm:hidden">
+            <p-button
+              [label]="'BRANDS.DETAILS.VIEW_ALL_PRODUCTS' | translate"
+              icon="pi pi-arrow-right"
+              iconPos="right"
+              (click)="viewAllProducts()"
+              severity="secondary"
+              [outlined]="true"
+              class="w-full">
+            </p-button>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Products in This Brand - Using Product Card Component -->
+      @if (hasProducts()) {
+        <div class="py-6">
+          <div class="max-w-7xl mx-auto px-4">
+            
+            <div class="flex items-center justify-between mb-4">
+              <h2 class="text-lg font-semibold text-color">
+                {{ 'BRANDS.DETAILS.FEATURED_PRODUCTS' | translate }}
+              </h2>
+            </div>
+            
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+              @for (product of products(); track product._id) {
+                <app-product-card [product]="product"></app-product-card>
+              }
+            </div>
+          </div>
+        </div>
+      }
+      
+      <!-- No Products State -->
+      @else if (!loading() && !hasProducts()) {
+        <div class="py-12">
+          <div class="max-w-7xl mx-auto px-4">
+            <div class="text-center">
+              <i class="pi pi-inbox text-5xl text-muted-color mb-4"></i>
+              <h3 class="text-xl font-semibold text-color mb-2">
+                {{ 'BRANDS.DETAILS.NO_PRODUCTS_AVAILABLE' | translate }}
+              </h3>
+              <p class="text-muted-color">
+                {{ 'BRANDS.DETAILS.NO_PRODUCTS_MESSAGE' | translate: {name: brand()!.name} }}
+              </p>
+            </div>
+          </div>
+        </div>
+      }
+      
+    </div>
+  }
+  
+</div>

@@ -1,0 +1,134 @@
+<div class="min-h-screen flex items-center justify-center bg-surface-ground py-12 px-4 sm:px-6 lg:px-8">
+  <div class="max-w-md w-full space-y-4">
+    <!-- Header -->
+    <div class="text-center">
+      <h2 class="text-3xl font-extrabold text-color">
+        {{ 'AUTH.LOGIN.TITLE' | translate }}
+      </h2>
+      <p class="mt-2 text-sm text-muted-color">
+        {{ 'AUTH.LOGIN.SUBTITLE' | translate }}
+      </p>
+    </div>
+
+    <!-- Login Form Card -->
+    <p-card class="shadow-lg">
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="space-y-6">
+        
+        <!-- Email Field -->
+        <div class="space-y-1">
+          <label for="email" class="block text-sm font-medium text-color">{{ 'AUTH.LOGIN.EMAIL' | translate }}</label>
+          <input 
+            id="email"
+            pInputText 
+            formControlName="email"
+            [placeholder]="'AUTH.LOGIN.EMAIL_PLACEHOLDER' | translate"
+            type="email"
+            class="w-full"
+            [class.p-invalid]="isFieldInvalid('email')"
+          />
+          @if (isFieldInvalid('email')) {
+            <small class="text-red-500">
+              @if (loginForm.get('email')?.errors?.['required']) {
+                {{ 'AUTH.LOGIN.ERRORS.EMAIL_REQUIRED' | translate }}
+              }
+              @if (loginForm.get('email')?.errors?.['email']) {
+                {{ 'AUTH.LOGIN.ERRORS.EMAIL_INVALID' | translate }}
+              }
+            </small>
+          }
+        </div>
+
+        <!-- Password Field -->
+        <div class="space-y-1">
+          <label for="password" class="block text-sm font-medium text-color">{{ 'AUTH.LOGIN.PASSWORD' | translate }}</label>
+          <p-password 
+            id="password"
+            formControlName="password"
+            [placeholder]="'AUTH.LOGIN.PASSWORD_PLACEHOLDER' | translate"
+            [toggleMask]="true"
+            [feedback]="false"
+            class="w-full"
+            [inputStyle]="{ width: '100%' }"
+            [style]="{ width: '100%' }"
+          />
+          @if (isFieldInvalid('password')) {
+            <small class="text-red-500">
+              @if (loginForm.get('password')?.errors?.['required']) {
+                {{ 'AUTH.LOGIN.ERRORS.PASSWORD_REQUIRED' | translate }}
+              }
+            </small>
+          }
+        </div>
+
+        <!-- Remember Me & Forgot Password -->
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <p-checkbox 
+              formControlName="rememberMe"
+              [binary]="true"
+              inputId="rememberMe"
+            />
+            <label for="rememberMe" class="block text-sm text-color">
+              {{ 'AUTH.LOGIN.REMEMBER_ME' | translate }}
+            </label>
+          </div>
+          <div class="text-sm">
+            <p-button 
+              [label]="'AUTH.LOGIN.FORGOT_PASSWORD' | translate"
+              (onClick)="navigateToForgotPassword()"
+              [text]="true"
+              severity="primary"
+              size="small"
+              styleClass="!p-0 !h-auto" />
+          </div>
+        </div>
+
+        <!-- Error Message -->
+        @if (errorMessage()) {
+          <p-message 
+            severity="error" 
+            [text]="errorMessage()"
+            class="w-full"
+          />
+        }
+
+        <!-- Success Message -->
+        @if (successMessage()) {
+          <p-message 
+            severity="success" 
+            [text]="successMessage()"
+            class="w-full"
+          />
+        }
+
+        <!-- severity="success" to make the button green -->
+        <!-- Submit Button -->
+        <div>
+          <p-button 
+            type="submit"
+            [label]="'AUTH.LOGIN.SIGN_IN' | translate"
+            icon="pi pi-sign-in"
+            [loading]="isLoading()"
+            [disabled]="loginForm.invalid || isLoading()"
+            styleClass="w-full p-button-lg"
+          />
+        </div>
+
+        <!-- Register Link -->
+        <div class="text-center">
+          <span class="text-sm text-muted-color">
+            {{ 'AUTH.LOGIN.NO_ACCOUNT' | translate }}
+          </span>
+          <p-button 
+            [label]="'AUTH.LOGIN.CREATE_ACCOUNT' | translate"
+            (onClick)="navigateToRegister()"
+            [text]="true"
+            severity="primary"
+            size="small"
+            styleClass="!p-0 !h-auto !ml-1" />
+        </div>
+      </form>
+    </p-card>
+  </div>
+</div>
+

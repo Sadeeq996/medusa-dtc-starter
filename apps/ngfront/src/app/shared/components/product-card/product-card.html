@@ -1,0 +1,140 @@
+<!-- Enhanced Product Card - Pure PrimeNG + Tailwind CSS -->
+<div class="product-card group relative overflow-hidden rounded-xl border border-surface shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-2 cursor-pointer h-full flex flex-col"
+     (click)="viewProductDetails()"
+     [ariaLabel]="viewDetailsAriaLabel()">
+  
+  <!-- Product Image Container -->
+  <div class="relative overflow-hidden">
+    <img 
+      [src]="product().imageCover" 
+      [alt]="product().title"
+      class="w-full h-48 object-cover transition-transform duration-500 group-hover:scale-110">
+    
+    <!-- Discount Badge -->
+    @if (hasDiscount()) {
+      <p-badge 
+        [value]="discountPercentage()"
+        severity="danger"
+        class="!absolute !top-3 !left-3 !text-xs !font-bold !px-2 !py-1">
+      </p-badge>
+    }
+    
+    <!-- Wishlist Button -->
+    <p-button
+      [icon]="wishlistIconClass()"
+      (click)="onWishlistClick($event)"
+      [rounded]="true"
+      [text]="true"
+      [loading]="isTogglingWishlist()"
+      [severity]="isInWishlist() ? 'danger' : 'secondary'"
+      size="small"
+      class="!absolute !top-3 !right-3 !w-8 !h-8 !rounded-full !drop-shadow-md hover:!drop-shadow-lg !transition-all !duration-200 hover:!scale-110"
+      [ariaLabel]="wishlistAriaLabel()">
+    </p-button>
+  </div>
+  
+  <!-- Product Info -->
+  <div class="p-4 flex-1 flex flex-col">
+    
+    <!-- Centered Brand Badge -->
+    <div class="flex justify-center mb-3">
+      <p-badge 
+        [value]="product().brand.name"
+        class="!text-xs !font-bold !uppercase !tracking-wide !px-3 !py-1.5 !border-0 !rounded-full !shadow-sm">
+      </p-badge>
+    </div>
+    
+    <!-- Product Title -->
+    <h3 class="text-xs sm:text-sm font-semibold text-color mb-3 line-clamp-2 leading-relaxed min-h-[2.75rem] sm:min-h-[3rem] text-left" dir="ltr">
+      {{ product().title }}
+    </h3>
+    
+    <!-- Rating Section (Always Present for Consistent Height) -->
+    <div class="flex items-center gap-2 mb-3 min-h-[1.25rem]">
+      @if (product().ratingsAverage > 0) {
+        <p-rating 
+          [ngModel]="product().ratingsAverage" 
+          [readonly]="true"
+          [stars]="5"
+          class="!text-xs">
+        </p-rating>
+        <span class="text-xs text-muted-color">
+          {{ product().ratingsAverage }}/5 ({{ product().ratingsQuantity || 0 }})
+        </span>
+      } @else {
+        <!-- Empty space to maintain consistent height -->
+        <div class="h-4"></div>
+      }
+    </div>
+    
+    <!-- Price Section -->
+    <div class="mb-4 mt-auto">
+      <div class="flex items-center gap-2 mb-1">
+        <!-- Current/Discounted Price -->
+        <span class="text-base sm:text-lg font-bold text-primary">
+          {{ currentPrice() | number:'1.0-0' }} EGP
+        </span>
+        
+        <!-- Original Price (if discounted) -->
+        @if (hasDiscount()) {
+          <span class="text-sm text-muted-color line-through decoration-2">
+            {{ product().price | number:'1.0-0' }} EGP
+          </span>
+        }
+      </div>
+      
+      <!-- Stock Status -->
+      @if (product().quantity > 0) {
+        <p class="text-xs text-primary font-medium">
+          <i class="pi pi-check-circle mr-1"></i>
+          {{ 'PRODUCTS.IN_STOCK' | translate }}
+        </p>
+      } @else {
+        <p class="text-xs text-red-500 font-medium">
+          <i class="pi pi-times-circle mr-1"></i>
+          {{ 'PRODUCTS.OUT_OF_STOCK' | translate }}
+        </p>
+      }
+    </div>
+  </div>
+
+  <!-- to make the add to cart button green make it severity="success" -->
+
+  <!-- Action Buttons Footer -->
+  <div class="p-4 pt-0 flex justify-center">
+    <!-- Add to Cart Button (Not in cart) -->
+    @if (!isInCart()) {
+      <p-button 
+        [label]="'PRODUCTS.ADD_TO_CART' | translate"
+        icon="pi pi-shopping-cart"
+        (click)="onAddToCartClick($event)"
+
+        size="small"
+        [loading]="isAddingToCart()"
+        [disabled]="!canAddToCart()"
+        class="!py-1.5 sm:!py-2 !text-xs !font-semibold">
+      </p-button>
+    } @else {
+      <!-- In Cart - Show quantity and view cart option -->
+      <div class="flex items-center gap-2">
+        <p-chip 
+          [label]="inCartLabel()"
+          icon="pi pi-check"
+          class="!text-xs !font-semibold">
+        </p-chip>
+        <p-button 
+          icon="pi pi-plus"
+          (click)="onAddToCartClick($event)"
+          severity="success"
+          size="small"
+          [loading]="isAddingToCart()"
+          [disabled]="!canAddToCart()"
+          [text]="true"
+          class="!w-6 !h-6 !p-0"
+          [ariaLabel]="addAnotherAriaLabel()">
+        </p-button>
+      </div>
+    }
+  </div>
+  
+</div>

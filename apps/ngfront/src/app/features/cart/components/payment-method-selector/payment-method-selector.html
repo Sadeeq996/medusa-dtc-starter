@@ -1,0 +1,85 @@
+<p-card>
+  <ng-template pTemplate="header">
+    <div class="flex items-center gap-3 p-4 bg-emphasis">
+      <i class="pi pi-credit-card text-primary"></i>
+      <h3 class="font-semibold text-color">{{ 'PAYMENT.TITLE' | translate }}</h3>
+    </div>
+  </ng-template>
+  
+  <div class="space-y-4">
+    <!-- Cash on Delivery Option -->
+    <div 
+      class="payment-option border rounded-lg p-4 cursor-pointer transition-all duration-200"
+      [class.border-primary]="paymentMethodSignal() === 'cash'"
+      [class.bg-primary/10]="paymentMethodSignal() === 'cash'"
+      [class.border-surface]="paymentMethodSignal() !== 'cash'"
+      [class.pointer-events-none]="isDisabled()"
+      [class.opacity-50]="isDisabled()"
+      (click)="selectPaymentMethod('cash')"
+      role="button"
+      tabindex="0"
+      (keydown.enter)="selectPaymentMethod('cash')"
+      (keydown.space)="selectPaymentMethod('cash')"
+      [attr.aria-pressed]="paymentMethodSignal() === 'cash'"
+      [attr.aria-label]="'PAYMENT.CASH_ARIA' | translate">
+      <div class="flex items-center gap-3">
+        <p-radiobutton 
+          value="cash" 
+          [(ngModel)]="paymentMethodSignal" 
+          inputId="cash"
+          [disabled]="isDisabled()"
+          [ngModelOptions]="{standalone: true}">
+        </p-radiobutton>
+        <div class="flex-1">
+          <div class="flex items-center gap-2">
+            <i class="pi pi-wallet text-lg text-muted-color" aria-hidden="true"></i>
+            <label for="cash" class="font-medium text-color cursor-pointer">
+              {{ 'PAYMENT.CASH_TITLE' | translate }}
+            </label>
+          </div>
+          <p class="text-sm text-muted-color mt-1">
+            {{ 'PAYMENT.CASH_DESCRIPTION' | translate }}
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Credit Card Option -->
+    <div 
+      class="payment-option border rounded-lg p-4 cursor-pointer transition-all duration-200"
+      [class.border-primary]="paymentMethodSignal() === 'card'"
+      [class.bg-primary/10]="paymentMethodSignal() === 'card'"
+      [class.border-surface]="paymentMethodSignal() !== 'card'"
+      [class.pointer-events-none]="isDisabled()"
+      [class.opacity-50]="isDisabled()"
+      (click)="selectPaymentMethod('card')"
+      role="button"
+      tabindex="0"
+      (keydown.enter)="selectPaymentMethod('card')"
+      (keydown.space)="selectPaymentMethod('card')"
+      [attr.aria-pressed]="paymentMethodSignal() === 'card'"
+      [attr.aria-label]="'PAYMENT.CARD_ARIA' | translate">
+      <div class="flex items-center gap-3">
+        <p-radiobutton 
+          value="card" 
+          [(ngModel)]="paymentMethodSignal" 
+          inputId="card"
+          [disabled]="isDisabled()"
+          [ngModelOptions]="{standalone: true}">
+        </p-radiobutton>
+        <div class="flex-1">
+          <div class="flex items-center gap-2">
+            <i class="pi pi-credit-card text-lg text-muted-color" aria-hidden="true"></i>
+            <label for="card" class="font-medium text-color cursor-pointer">
+              {{ 'PAYMENT.CARD_TITLE' | translate }}
+            </label>
+          </div>
+          <p class="text-sm text-muted-color mt-1">
+            {{ 'PAYMENT.CARD_DESCRIPTION' | translate }}
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</p-card>
+

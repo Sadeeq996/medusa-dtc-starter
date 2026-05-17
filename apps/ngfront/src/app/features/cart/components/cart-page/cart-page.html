@@ -1,0 +1,406 @@
+<!-- Shopping Cart Page - Modern Design with PrimeNG + Tailwind CSS -->
+<div class="min-h-screen">
+
+  <!-- Page Header -->
+  <div class="border-b border-surface shadow-sm">
+    <div class="container mx-auto px-3 sm:px-4 py-4 sm:py-6">
+      <div class="flex items-center justify-between gap-2">
+        <div class="flex items-center gap-2 sm:gap-3">
+          <i class="pi pi-shopping-cart text-xl sm:text-2xl text-primary"></i>
+          <h1 class="text-lg sm:text-2xl font-bold text-color">
+            {{ 'CART.TITLE' | translate }}
+          </h1>
+          @if (!isEmpty()) {
+            <p-badge 
+              [value]="cartSummary().totalItems"
+              size="large">
+            </p-badge>
+          }
+        </div>
+        
+        <!-- Action Buttons -->
+        <div class="flex gap-1.5 sm:gap-2">
+          <p-button 
+            icon="pi pi-arrow-left"
+            [label]="'CART.CONTINUE_SHOPPING' | translate"
+            severity="secondary"
+            [outlined]="true"
+            (click)="continueShopping()"
+            size="small"
+            styleClass="hidden sm:inline-flex">
+          </p-button>
+          
+          <!-- Mobile: Icon only button -->
+          <p-button 
+            icon="pi pi-arrow-left"
+            severity="secondary"
+            [outlined]="true"
+            (click)="continueShopping()"
+            size="small"
+            styleClass="sm:hidden"
+            [ariaLabel]="'CART.CONTINUE_SHOPPING' | translate">
+          </p-button>
+          
+          @if (!isEmpty()) {
+            <p-button 
+              icon="pi pi-trash"
+              severity="danger"
+              [outlined]="true"
+              (click)="clearCart()"
+              [disabled]="isOperating()"
+              size="small"
+              styleClass="!h-9 !w-9 sm:!h-auto sm:!w-auto"
+              [ariaLabel]="'CART.CLEAR_CART' | translate">
+            </p-button>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container mx-auto px-3 sm:px-4 py-4 sm:py-8">
+
+    <!-- Error Message -->
+    @if (error()) {
+      <div class="mb-6">
+        <p-message 
+          severity="error" 
+          [text]="error() || ''"
+          [closable]="true"
+          (onClose)="clearError()">
+        </p-message>
+      </div>
+    }
+
+    <!-- Loading State -->
+    @if (showLoadingState()) {
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
+        <!-- Cart Items Skeleton -->
+        <div class="lg:col-span-2">
+          <p-card>
+            <div class="space-y-0">
+              @for (i of [1,2,3]; track i) {
+                <div class="flex gap-3 sm:gap-4 p-3 sm:p-4 border-b border-surface">
+                  <p-skeleton width="64px" height="64px" shape="rectangle" styleClass="sm:!w-20 sm:!h-20"></p-skeleton>
+                  <div class="flex-1 space-y-2">
+                    <p-skeleton width="100%" height="16px" styleClass="max-w-[200px]"></p-skeleton>
+                    <p-skeleton width="80px" height="14px"></p-skeleton>
+                    <p-skeleton width="60px" height="14px"></p-skeleton>
+                  </div>
+                  <p-skeleton width="60px" height="32px" styleClass="hidden sm:block"></p-skeleton>
+                </div>
+              }
+            </div>
+          </p-card>
+        </div>
+        
+        <!-- Summary Skeleton -->
+        <div class="lg:col-span-1">
+          <p-card>
+            <div class="space-y-4 p-2">
+              <p-skeleton width="100%" height="20px"></p-skeleton>
+              <p-skeleton width="80%" height="16px"></p-skeleton>
+              <p-skeleton width="100%" height="40px"></p-skeleton>
+            </div>
+          </p-card>
+        </div>
+      </div>
+    }
+
+    <!-- Empty Cart State -->
+    @else if (showEmptyState()) {
+      <div class="max-w-2xl mx-auto text-center">
+        
+        <!-- Empty Icon and Header -->
+        <div class="mb-4 sm:mb-6">
+          <div class="w-16 h-16 sm:w-20 sm:h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
+            <i class="pi pi-shopping-cart text-2xl sm:text-3xl text-primary"></i>
+          </div>
+          <h1 class="text-xl sm:text-2xl font-bold text-color mb-2 sm:mb-3">
+            {{ 'CART.EMPTY_TITLE' | translate }}
+          </h1>
+          <p class="text-sm sm:text-base text-muted-color px-4">
+            {{ 'CART.EMPTY_MESSAGE' | translate }}
+          </p>
+        </div>
+
+        <!-- Suggestions Card -->
+        <p-card class="mb-4 sm:mb-6 shadow-sm">
+          <ng-template pTemplate="header">
+            <div class="flex items-center gap-2 p-3 bg-emphasis">
+              <i class="pi pi-lightbulb text-primary"></i>
+              <h3 class="font-semibold text-color text-sm">{{ 'CART.EMPTY_SUGGESTIONS.TITLE' | translate }}</h3>
+            </div>
+          </ng-template>
+          
+          <div class="text-left space-y-3 p-3 sm:p-4">
+            <p class="text-xs sm:text-sm text-muted-color">
+              {{ 'CART.EMPTY_SUGGESTIONS.DESCRIPTION' | translate }}
+            </p>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3">
+              <div class="flex items-start gap-2 p-3 bg-emphasis rounded-lg">
+                <i class="pi pi-box text-xl text-primary flex-shrink-0 mt-0.5"></i>
+                <div class="min-w-0">
+                  <h4 class="font-medium text-color text-sm mb-0.5">{{ 'CART.EMPTY_SUGGESTIONS.FRESH_TITLE' | translate }}</h4>
+                  <p class="text-xs text-muted-color">{{ 'CART.EMPTY_SUGGESTIONS.FRESH_DESCRIPTION' | translate }}</p>
+                </div>
+              </div>
+              
+              <div class="flex items-start gap-2 p-3 bg-emphasis rounded-lg">
+                <i class="pi pi-truck text-xl text-green-600 flex-shrink-0 mt-0.5"></i>
+                <div class="min-w-0">
+                  <h4 class="font-medium text-color text-sm mb-0.5">{{ 'CART.EMPTY_SUGGESTIONS.DELIVERY_TITLE' | translate }}</h4>
+                  <p class="text-xs text-muted-color">{{ 'CART.EMPTY_SUGGESTIONS.DELIVERY_DESCRIPTION' | translate }}</p>
+                </div>
+              </div>
+              
+              <div class="flex items-start gap-2 p-3 bg-emphasis rounded-lg">
+                <i class="pi pi-shield text-xl text-blue-600 flex-shrink-0 mt-0.5"></i>
+                <div class="min-w-0">
+                  <h4 class="font-medium text-color text-sm mb-0.5">{{ 'CART.EMPTY_SUGGESTIONS.PAYMENT_TITLE' | translate }}</h4>
+                  <p class="text-xs text-muted-color">{{ 'CART.EMPTY_SUGGESTIONS.PAYMENT_DESCRIPTION' | translate }}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </p-card>
+
+        <!-- Action Button -->
+        <p-button 
+          label="{{ 'CART.START_SHOPPING' | translate }}"
+          severity="primary"
+          icon="pi pi-shopping-bag"
+          (click)="continueShopping()"
+          size="large">
+        </p-button>
+
+      </div>
+    }
+
+    <!-- Cart Content -->
+    @else if (!isEmpty()) {
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
+        
+        <!-- Cart Items -->
+        <div class="lg:col-span-2">
+          <p-card>
+            <ng-template pTemplate="header">
+              <div class="flex items-center justify-between p-3 sm:p-4 bg-emphasis">
+                <h3 class="font-semibold text-sm sm:text-base text-color">
+                  @if (cartSummary().totalItems === 1) {
+                    {{ 'CART.ITEMS' | translate }} ({{ 'CART.ITEMS_COUNT_SINGULAR' | translate }})
+                  } @else {
+                    {{ 'CART.ITEMS' | translate }} ({{ 'CART.ITEMS_COUNT_PLURAL' | translate: { count: cartSummary().totalItems } }})
+                  }
+                </h3>
+              </div>
+            </ng-template>
+            
+            <div class="space-y-0">
+              @for (item of cartItems(); track trackCartItem(item)) {
+                <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 p-3 sm:p-4 border-b border-surface last:border-b-0 hover:bg-emphasis transition-colors">
+                  
+                  <!-- Top Row: Image + Title + Price (Mobile) / Image + Details (Desktop) -->
+                  <div class="flex gap-3 sm:gap-4 flex-1">
+                    
+                    <!-- Product Image -->
+                    <div 
+                      class="flex-shrink-0 cursor-pointer group"
+                      (click)="viewProductDetails(item.product._id)">
+                      <img 
+                        [src]="getProductImageUrl(item)"
+                        [alt]="item.product.title"
+                        class="w-16 h-16 sm:w-20 sm:h-20 object-cover rounded-lg border border-surface group-hover:shadow-md transition-shadow"
+                      />
+                    </div>
+                    
+                    <!-- Product Details -->
+                    <div class="flex-1 min-w-0 flex flex-col justify-between">
+                      <!-- Product Title -->
+                      <h4 
+                        class="font-medium text-sm sm:text-base text-color hover:text-primary cursor-pointer transition-colors line-clamp-2 mb-1"
+                        (click)="viewProductDetails(item.product._id)">
+                        {{ item.product.title }}
+                      </h4>
+                      
+                      <!-- Brand and Category -->
+                      <div class="flex items-center gap-1.5 sm:gap-2 mb-2 flex-wrap">
+                        @if (item.product.brand && item.product.brand.name) {
+                          <p-tag 
+                            [value]="item.product.brand.name"
+                            [rounded]="true"
+                            size="small"
+                            class="!text-[10px] sm:!text-xs">
+                          </p-tag>
+                        }
+                        @if (item.product.category && item.product.category.name) {
+                          <p-tag 
+                            [value]="item.product.category.name"
+                            severity="secondary"
+                            [rounded]="true"
+                            size="small"
+                            class="!text-[10px] sm:!text-xs">
+                          </p-tag>
+                        }
+                      </div>
+                      
+                      <!-- Price Information (Hidden on mobile, shown on desktop) -->
+                      <div class="hidden sm:flex items-center gap-2">
+                        <span class="font-semibold text-base sm:text-lg text-color">
+                          {{ formatPrice(item.unitPrice) }}
+                        </span>
+                      </div>
+                    </div>
+                    
+                    <!-- Item Total (Desktop only) -->
+                    <div class="hidden sm:flex flex-col items-end justify-between min-w-[100px]">
+                      <div class="text-right">
+                        <div class="font-semibold text-lg text-color">
+                          {{ formatPrice(item.totalPrice) }}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <!-- Bottom Row: Price + Quantity + Actions (Mobile) -->
+                  <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
+                    
+                    <!-- Price and Total (Mobile only) -->
+                    <div class="flex sm:hidden items-center justify-between w-full">
+                      <span class="font-semibold text-sm text-color">
+                        {{ formatPrice(item.unitPrice) }}
+                      </span>
+                      <span class="font-semibold text-base text-primary">
+                        {{ formatPrice(item.totalPrice) }}
+                      </span>
+                    </div>
+                    
+                    <!-- Quantity and Actions -->
+                    <div class="flex items-center gap-2 sm:gap-3 w-full sm:w-auto justify-between sm:justify-start">
+                      <!-- Quantity Control -->
+                      <div class="flex items-center gap-1.5 sm:gap-2">
+                        <span class="text-xs sm:text-sm text-muted-color hidden sm:inline">
+                          {{ 'CART.QUANTITY' | translate }}:
+                        </span>
+                        
+                        <!-- Decrement Button -->
+                        <p-button 
+                          icon="pi pi-minus"
+                          severity="secondary"
+                          [outlined]="true"
+                          size="small"
+                          [disabled]="isOperating() || item.quantity <= 1"
+                          (click)="decrementQuantity(item)"
+                          styleClass="!h-8 !w-8 sm:!h-9 sm:!w-9"
+                          [ariaLabel]="'Decrease quantity'">
+                        </p-button>
+                        
+                        <!-- Quantity Display -->
+                        <span class="font-semibold text-sm sm:text-base text-color px-2 sm:px-3 min-w-[32px] sm:min-w-[40px] text-center">
+                          {{ item.quantity }}
+                        </span>
+                        
+                        <!-- Increment Button -->
+                        <p-button 
+                          icon="pi pi-plus"
+                          severity="secondary"
+                          [outlined]="true"
+                          size="small"
+                          [disabled]="isOperating() || item.quantity >= item.product.quantity"
+                          (click)="incrementQuantity(item)"
+                          styleClass="!h-8 !w-8 sm:!h-9 sm:!w-9"
+                          [ariaLabel]="'Increase quantity'">
+                        </p-button>
+                      </div>
+                      
+                      <!-- Remove Button -->
+                      <p-button 
+                        icon="pi pi-trash"
+                        severity="danger"
+                        [outlined]="true"
+                        size="small"
+                        [disabled]="isOperating()"
+                        (click)="removeItem(item.product._id)"
+                        styleClass="!h-8 !w-8 sm:!h-9 sm:!w-9"
+                        [ariaLabel]="'Remove item from cart'">
+                      </p-button>
+                    </div>
+                  </div>
+                  
+                </div>
+              }
+            </div>
+          </p-card>
+        </div>
+        
+        <!-- Cart Summary -->
+        <div class="lg:col-span-1">
+          <div class="sticky top-4">
+            <p-card>
+              <ng-template pTemplate="header">
+                <div class="p-4 bg-emphasis">
+                  <h3 class="font-semibold text-color">
+                    {{ 'CART.ORDER_SUMMARY' | translate }}
+                  </h3>
+                </div>
+              </ng-template>
+              
+              <div class="space-y-4">
+                <!-- Items Summary -->
+                <div class="flex justify-between items-center">
+                  <span class="text-muted-color">
+                    @if (cartSummary().totalItems === 1) {
+                      {{ 'CART.ITEMS_COUNT_SINGULAR' | translate }}
+                    } @else {
+                      {{ 'CART.ITEMS_COUNT_PLURAL' | translate: { count: cartSummary().totalItems } }}
+                    }
+                  </span>
+                  <span class="font-medium text-color">
+                    {{ formatPrice(cartSummary().totalPrice) }}
+                  </span>
+                </div>
+                
+                <p-divider></p-divider>
+                
+                <!-- Total -->
+                <div class="flex justify-between items-center text-lg font-bold">
+                  <span class="text-color">
+                    {{ 'CART.TOTAL' | translate }}
+                  </span>
+                  <span class="text-primary">
+                    {{ formatPrice(cartSummary().totalPrice) }}
+                  </span>
+                </div>
+                
+                <!-- Checkout Button -->
+                <p-button 
+                  label="{{ 'CART.PROCEED_TO_CHECKOUT' | translate }}"
+                  severity="primary"
+                  icon="pi pi-arrow-right"
+                  iconPos="right"
+                  (click)="proceedToCheckout()"
+                  [disabled]="isOperating() || isEmpty()"
+                  [loading]="isOperating()"
+                  class="w-full mt-4">
+                </p-button>
+                
+                <!-- Continue Shopping Link -->
+                <p-button 
+                  label="{{ 'CART.CONTINUE_SHOPPING' | translate }}"
+                  severity="secondary"
+                  [text]="true"
+                  icon="pi pi-arrow-left"
+                  (click)="continueShopping()"
+                  class="w-full">
+                </p-button>
+              </div>
+            </p-card>
+          </div>
+        </div>
+        
+      </div>
+    }
+
+  </div>
+</div>

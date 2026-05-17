@@ -1,0 +1,71 @@
+<!-- Categories Showcase - PrimeNG Cards with Tailwind CSS -->
+<section class="py-12">
+  <div class="max-w-7xl mx-auto px-4">
+    
+    <!-- Section Header -->
+    <div class="text-center mb-10">
+      <h2 class="text-3xl font-bold text-color mb-4">
+        {{ 'HOME.CATEGORIES.TITLE' | translate }}
+      </h2>
+      <p class="text-lg text-muted-color max-w-2xl mx-auto">
+        {{ 'HOME.CATEGORIES.SUBTITLE' | translate }}
+      </p>
+    </div>
+    
+    <!-- Categories Grid -->
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
+      @if (loading()) {
+        <!-- Loading Skeleton -->
+        @for (item of [1,2,3,4,5,6]; track item) {
+          <p-card class="shadow-sm">
+            <p-skeleton height="8rem" styleClass="mb-3 rounded-lg"></p-skeleton>
+            <p-skeleton width="80%" height="1rem" styleClass="mb-2"></p-skeleton>
+          </p-card>
+        }
+      } @else {
+        @for (category of categories(); track category._id) {
+          <p-card 
+            class="cursor-pointer transform transition-all duration-300 hover:scale-105 hover:shadow-lg"
+            styleClass="h-full"
+            (click)="navigateToCategory(category)">
+            
+            <ng-template #header>
+              <div class="relative overflow-hidden rounded-t-lg group">
+                <img 
+                  [src]="category.image" 
+                  [alt]="category.name"
+                  class="w-full h-32 object-cover transition-transform duration-300 group-hover:scale-110">
+                <div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              </div>
+            </ng-template>
+            
+            <div class="text-center py-4">
+              <h3 class="font-semibold text-color text-sm md:text-base line-clamp-2">
+                {{ category.name }}
+              </h3>
+            </div>
+          </p-card>
+        } @empty {
+          <div class="col-span-full text-center text-muted-color py-8">
+            <p>{{ 'HOME.CATEGORIES.NO_CATEGORIES' | translate }}</p>
+          </div>
+        }
+      }
+    </div>
+    
+    <!-- View All Button -->
+    <div class="text-center mt-10">
+      <p-button
+        [label]="'HOME.CATEGORIES.VIEW_ALL' | translate"
+        icon="pi pi-arrow-right"
+        iconPos="right"
+        routerLink="/categories"
+        severity="secondary"
+        [text]="true"
+        size="large">
+      </p-button>
+    </div>
+    
+  </div>
+</section>
+

@@ -1,0 +1,9 @@
+/* Header Component Styles - Following PrimeNG + Tailwind Best Practices */
+
+/* ✅ Using Tailwind utility classes directly in HTML instead of custom CSS */
+/* All styling is now done via Tailwind classes from tailwindcss-primeui plugin:
+   - bg-primary: Theme-aware primary color background
+   - text-primary-contrast: White/dark text that contrasts with primary background
+   - shadow-md: Standard shadow
+   - hover:!bg-white/10: Hover states with transparency
+*/

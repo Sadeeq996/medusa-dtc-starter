@@ -1,0 +1,301 @@
+<!-- Settings Page - Pure PrimeNG + Tailwind CSS -->
+<div class="min-h-screen">
+
+  <!-- Page Header -->
+  <div class="border-b border-surface shadow-sm">
+    <div class="max-w-4xl mx-auto px-4 py-6">
+      <div class="flex items-center gap-3">
+        <i class="pi pi-cog text-2xl text-primary"></i>
+        <h1 class="text-2xl font-bold text-color">
+          {{ 'PROFILE.SETTINGS.TITLE' | translate }}
+        </h1>
+      </div>
+    </div>
+  </div>
+
+  <div class="max-w-4xl mx-auto px-4 py-8 space-y-8">
+
+    <!-- Profile Information Card -->
+    <p-card>
+      <ng-template pTemplate="header">
+        <div class="flex items-center gap-3 p-4 bg-emphasis">
+          <i class="pi pi-user text-primary"></i>
+          <h3 class="font-semibold text-color">{{ 'PROFILE.SETTINGS.PROFILE_INFO' | translate }}</h3>
+        </div>
+      </ng-template>
+      
+      @if (profileError()) {
+        <div class="mb-6">
+          <p-message 
+            severity="error" 
+            [text]="profileError()"
+            [closable]="true"
+            (onClose)="clearProfileError()">
+          </p-message>
+        </div>
+      }
+      
+      <form [formGroup]="profileForm" (ngSubmit)="onSubmitProfileUpdate()" class="space-y-6">
+        
+        <!-- Full Name -->
+        <div class="flex flex-col gap-2">
+          <label for="name" class="text-sm font-medium text-color">
+            {{ 'PROFILE.SETTINGS.FULL_NAME' | translate }} <span class="text-red-500">*</span>
+          </label>
+          <input 
+            id="name"
+            type="text" 
+            pInputText 
+            formControlName="name"
+            [placeholder]="'PROFILE.SETTINGS.FULL_NAME_PLACEHOLDER' | translate"
+            class="w-full"
+            [class.p-invalid]="isFieldInvalid(profileForm, 'name')" />
+          @if (isFieldInvalid(profileForm, 'name')) {
+            <small class="text-red-500">
+              @if (profileForm.get('name')?.errors?.['required']) {
+                {{ 'PROFILE.SETTINGS.ERRORS.NAME_REQUIRED' | translate }}
+              }
+              @if (profileForm.get('name')?.errors?.['minlength']) {
+                {{ 'PROFILE.SETTINGS.ERRORS.NAME_MIN_LENGTH' | translate }}
+              }
+            </small>
+          }
+        </div>
+
+        <!-- Email -->
+        <div class="flex flex-col gap-2">
+          <label for="email" class="text-sm font-medium text-color">
+            {{ 'PROFILE.SETTINGS.EMAIL' | translate }} <span class="text-red-500">*</span>
+          </label>
+          <input 
+            id="email"
+            type="email" 
+            pInputText 
+            formControlName="email"
+            [placeholder]="'PROFILE.SETTINGS.EMAIL_PLACEHOLDER' | translate"
+            class="w-full"
+            [class.p-invalid]="isFieldInvalid(profileForm, 'email')" />
+          @if (isFieldInvalid(profileForm, 'email')) {
+            <small class="text-red-500">
+              @if (profileForm.get('email')?.errors?.['required']) {
+                {{ 'PROFILE.SETTINGS.ERRORS.EMAIL_REQUIRED' | translate }}
+              }
+              @if (profileForm.get('email')?.errors?.['email']) {
+                {{ 'PROFILE.SETTINGS.ERRORS.EMAIL_INVALID' | translate }}
+              }
+            </small>
+          }
+        </div>
+
+        <!-- Phone -->
+        <div class="flex flex-col gap-2">
+          <label for="phone" class="text-sm font-medium text-color">
+            {{ 'PROFILE.SETTINGS.PHONE' | translate }} <span class="text-red-500">*</span>
+          </label>
+          <input 
+            id="phone"
+            type="text" 
+            pInputText 
+            formControlName="phone"
+            [placeholder]="'PROFILE.SETTINGS.PHONE_PLACEHOLDER' | translate"
+            class="w-full"
+            [class.p-invalid]="isFieldInvalid(profileForm, 'phone')" />
+          @if (isFieldInvalid(profileForm, 'phone')) {
+            <small class="text-red-500">
+              @if (profileForm.get('phone')?.errors?.['required']) {
+                {{ 'PROFILE.SETTINGS.ERRORS.PHONE_REQUIRED' | translate }}
+              }
+              @if (profileForm.get('phone')?.errors?.['pattern']) {
+                {{ 'PROFILE.SETTINGS.ERRORS.PHONE_INVALID' | translate }}
+              }
+            </small>
+          }
+        </div>
+
+        <!-- Form Actions -->
+        <div class="flex justify-end gap-2 pt-4 border-t border-surface">
+          <p-button 
+            [label]="'PROFILE.SETTINGS.RESET' | translate" 
+            severity="secondary"
+            [outlined]="true"
+            type="button"
+            (click)="resetProfileForm()"
+            [disabled]="isUpdatingProfile() || !hasProfileChanges()">
+          </p-button>
+          <p-button 
+            [label]="'PROFILE.SETTINGS.UPDATE_PROFILE' | translate" 
+            severity="primary"
+            icon="pi pi-check"
+            type="submit"
+            [loading]="isUpdatingProfile()"
+            [disabled]="profileForm.invalid || isUpdatingProfile() || !hasProfileChanges()">
+          </p-button>
+        </div>
+        
+      </form>
+    </p-card>
+
+    <!-- Change Password Card -->
+    <p-card>
+      <ng-template pTemplate="header">
+        <div class="flex items-center gap-3 p-4 bg-emphasis">
+          <i class="pi pi-lock text-primary"></i>
+          <h3 class="font-semibold text-color">{{ 'PROFILE.SETTINGS.CHANGE_PASSWORD' | translate }}</h3>
+        </div>
+      </ng-template>
+      
+      @if (passwordError()) {
+        <div class="mb-6">
+          <p-message 
+            severity="error" 
+            [text]="passwordError()"
+            [closable]="true"
+            (onClose)="clearPasswordError()">
+          </p-message>
+        </div>
+      }
+      
+      <form [formGroup]="passwordForm" (ngSubmit)="onSubmitPasswordChange()" class="space-y-6">
+        
+        <!-- Current Password -->
+        <div class="flex flex-col gap-2">
+          <label for="currentPassword" class="text-sm font-medium text-color">
+            {{ 'PROFILE.SETTINGS.CURRENT_PASSWORD' | translate }} <span class="text-red-500">*</span>
+          </label>
+          <p-password 
+            id="currentPassword"
+            formControlName="currentPassword"
+            [placeholder]="'PROFILE.SETTINGS.CURRENT_PASSWORD_PLACEHOLDER' | translate"
+            [toggleMask]="true"
+            [feedback]="false"
+            class="w-full"
+            [inputStyle]="{ width: '100%' }"
+            [style]="{ width: '100%' }" />
+          @if (isFieldInvalid(passwordForm, 'currentPassword')) {
+            <small class="text-red-500">
+              {{ 'PROFILE.SETTINGS.ERRORS.CURRENT_PASSWORD_REQUIRED' | translate }}
+            </small>
+          }
+        </div>
+
+        <!-- New Password -->
+        <div class="flex flex-col gap-2">
+          <label for="password" class="text-sm font-medium text-color">
+            {{ 'PROFILE.SETTINGS.NEW_PASSWORD' | translate }} <span class="text-red-500">*</span>
+          </label>
+          <p-password 
+            id="password"
+            formControlName="password"
+            [placeholder]="'PROFILE.SETTINGS.NEW_PASSWORD_PLACEHOLDER' | translate"
+            [toggleMask]="true"
+            [feedback]="true"
+            class="w-full"
+            [inputStyle]="{ width: '100%' }"
+            [style]="{ width: '100%' }" />
+          @if (isFieldInvalid(passwordForm, 'password')) {
+            <small class="text-red-500">
+              @if (passwordForm.get('password')?.errors?.['required']) {
+                {{ 'PROFILE.SETTINGS.ERRORS.NEW_PASSWORD_REQUIRED' | translate }}
+              }
+              @if (passwordForm.get('password')?.errors?.['minlength']) {
+                {{ 'PROFILE.SETTINGS.ERRORS.PASSWORD_MIN_LENGTH' | translate }}
+              }
+              @if (passwordForm.get('password')?.errors?.['pattern']) {
+                {{ 'PROFILE.SETTINGS.ERRORS.PASSWORD_PATTERN' | translate }}
+              }
+            </small>
+          }
+        </div>
+
+        <!-- Confirm Password -->
+        <div class="flex flex-col gap-2">
+          <label for="rePassword" class="text-sm font-medium text-color">
+            {{ 'PROFILE.SETTINGS.CONFIRM_PASSWORD' | translate }} <span class="text-red-500">*</span>
+          </label>
+          <p-password 
+            id="rePassword"
+            formControlName="rePassword"
+            [placeholder]="'PROFILE.SETTINGS.CONFIRM_PASSWORD_PLACEHOLDER' | translate"
+            [toggleMask]="true"
+            [feedback]="false"
+            class="w-full"
+            [inputStyle]="{ width: '100%' }"
+            [style]="{ width: '100%' }" />
+          @if (isFieldInvalid(passwordForm, 'rePassword')) {
+            <small class="text-red-500">
+              {{ 'PROFILE.SETTINGS.ERRORS.CONFIRM_PASSWORD_REQUIRED' | translate }}
+            </small>
+          }
+        </div>
+
+        <!-- Security Note -->
+        <div class="p-4 bg-emphasis rounded-lg border border-surface">
+          <div class="flex items-start gap-3">
+            <i class="pi pi-info-circle text-primary mt-1"></i>
+            <div class="text-sm text-muted-color">
+              <p class="font-medium mb-1">{{ 'PROFILE.SETTINGS.PASSWORD_REQUIREMENTS' | translate }}:</p>
+              <ul class="list-disc list-inside space-y-1">
+                <li>{{ 'PROFILE.SETTINGS.PASSWORD_REQ_LENGTH' | translate }}</li>
+                <li>{{ 'PROFILE.SETTINGS.PASSWORD_REQ_CASE' | translate }}</li>
+                <li>{{ 'PROFILE.SETTINGS.PASSWORD_REQ_NUMBER' | translate }}</li>
+                <li>{{ 'PROFILE.SETTINGS.PASSWORD_REQ_SPECIAL' | translate }}</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="flex justify-end gap-2 pt-4 border-t border-surface">
+          <p-button 
+            [label]="'PROFILE.SETTINGS.CANCEL' | translate" 
+            severity="secondary"
+            [outlined]="true"
+            type="button"
+            (click)="resetPasswordForm()"
+            [disabled]="isChangingPassword()">
+          </p-button>
+          <p-button 
+            [label]="'PROFILE.SETTINGS.CHANGE_PASSWORD_BUTTON' | translate" 
+            severity="primary"
+            icon="pi pi-key"
+            type="submit"
+            [loading]="isChangingPassword()"
+            [disabled]="passwordForm.invalid || isChangingPassword()">
+          </p-button>
+        </div>
+        
+      </form>
+    </p-card>
+
+    <!-- Account Information Card -->
+    <p-card>
+      <ng-template pTemplate="header">
+        <div class="flex items-center gap-3 p-4 bg-emphasis">
+          <i class="pi pi-info-circle text-primary"></i>
+          <h3 class="font-semibold text-color">{{ 'PROFILE.SETTINGS.ACCOUNT_INFO' | translate }}</h3>
+        </div>
+      </ng-template>
+      
+      <div class="space-y-4">
+        <div class="flex justify-between items-center pb-3 border-b border-surface">
+          <span class="text-muted-color">{{ 'PROFILE.SETTINGS.ACCOUNT_ROLE' | translate }}</span>
+          <p-tag 
+            [value]="currentUser()?.role || 'user'"
+            [rounded]="true">
+          </p-tag>
+        </div>
+        
+        @if (currentUser()?.createdAt) {
+          <div class="flex justify-between items-center">
+            <span class="text-muted-color">{{ 'PROFILE.SETTINGS.MEMBER_SINCE' | translate }}</span>
+            <span class="font-medium text-color">
+              {{ currentUser()!.createdAt | date:'longDate' }}
+            </span>
+          </div>
+        }
+      </div>
+    </p-card>
+
+  </div>
+</div>
+

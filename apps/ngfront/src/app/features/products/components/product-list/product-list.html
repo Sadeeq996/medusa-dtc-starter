@@ -1,0 +1,316 @@
+<!-- Enhanced Product List Page - Pure PrimeNG + Tailwind CSS -->
+<div class="min-h-screen">
+  
+  <!-- Compact Page Header -->
+  <div class="border-b border-surface shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 py-6">
+      
+      <!-- Title and Controls Row -->
+      <div class="flex flex-col lg:flex-row lg:items-center gap-6">
+        
+        <!-- Left: Title and Icon -->
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 bg-primary rounded-xl flex items-center justify-center">
+            <i class="pi pi-shopping-bag text-primary-contrast text-lg"></i>
+          </div>
+          <div>
+            <h1 class="text-2xl font-bold text-color">{{ 'PRODUCTS.LIST.TITLE' | translate }}</h1>
+            @if (!loading() && hasProducts()) {
+              <p class="text-sm text-muted-color">
+                {{ 'PRODUCTS.LIST.PRODUCTS_FOUND' | translate: {count: totalProducts()} }}
+                @if (searchQuery()) {
+                  <span class="ml-1">{{ 'PRODUCTS.LIST.FOR_QUERY' | translate: {query: searchQuery()} }}</span>
+                }
+                @if (categoryFilter().length > 0) {
+                  <span class="ml-1">{{ 'PRODUCTS.LIST.IN_CATEGORY' | translate: {category: selectedCategoryName()} }}</span>
+                }
+                @if (brandFilter()) {
+                  <span class="ml-1">{{ 'PRODUCTS.LIST.FROM_BRAND' | translate: {brand: selectedBrandName()} }}</span>
+                }
+              </p>
+            }
+          </div>
+        </div>
+        
+        <!-- Right: Search and Filter Controls - Responsive Layout -->
+        <div class="flex flex-1 lg:flex-none flex-col gap-3 lg:min-w-[600px]">
+          
+          <!-- Mobile: Search Input (Full Width) -->
+          <div class="flex lg:hidden w-full">
+            <div class="flex-1 relative">
+              <p-iconfield iconPosition="left" class="w-full">
+                <p-inputicon class="pi pi-search" />
+                <input 
+                  type="text"
+                  pInputText
+                  [formControl]="searchControl"
+                  [placeholder]="'PRODUCTS.LIST.SEARCH_PLACEHOLDER' | translate"
+                  class="w-full pr-12"
+                  (keyup.enter)="onSearch()"
+                />
+              </p-iconfield>
+              
+              <!-- Clear Button Inside Input -->
+              @if (searchQuery()) {
+                <p-button
+                  icon="pi pi-times"
+                  severity="secondary"
+                  [text]="true"
+                  size="small"
+                  (click)="clearSearch()"
+                  [disabled]="loading()"
+                  class="!absolute !right-2 !top-1/2 !-translate-y-1/2 !w-7 !h-7 !p-0 !min-w-0 !flex !items-center !justify-center !rounded-full"
+                  [ariaLabel]="'PRODUCTS.LIST.CLEAR_SEARCH' | translate">
+                </p-button>
+              }
+            </div>
+          </div>
+          
+          <!-- Mobile: Filter Controls (Compact Row) -->
+          <div class="flex lg:hidden gap-2">
+            <!-- Category Filter Dropdown -->
+            <div class="flex-1 min-w-0">
+              <p-select
+                [options]="categories()"
+                [ngModel]="categoryFilter()[0] || null"
+                (ngModelChange)="onCategoryChange($event)"
+                optionLabel="name"
+                optionValue="_id"
+                [placeholder]="'PRODUCTS.LIST.CATEGORY_FILTER' | translate"
+                [showClear]="true"
+                [disabled]="categoriesLoading()"
+                class="w-full">
+              </p-select>
+            </div>
+            
+            <!-- Brand Filter Dropdown -->
+            <div class="flex-1 min-w-0">
+              <p-select
+                [options]="brands()"
+                [ngModel]="brandFilter() || null"
+                (ngModelChange)="onBrandChange($event)"
+                optionLabel="name"
+                optionValue="_id"
+                [placeholder]="'PRODUCTS.LIST.BRAND_FILTER' | translate"
+                [showClear]="true"
+                [disabled]="brandsLoading()"
+                class="w-full">
+              </p-select>
+            </div>
+            
+            <!-- Sort Dropdown -->
+            <div class="w-20 flex-shrink-0">
+              <p-select
+                [options]="sortOptions()"
+                [ngModel]="sortBy()"
+                (ngModelChange)="onSortChange($event)"
+                optionLabel="label"
+                optionValue="value"
+                [placeholder]="'PRODUCTS.LIST.SORT_BY' | translate"
+                class="w-full">
+              </p-select>
+            </div>
+          </div>
+          
+          <!-- Desktop: All Controls in One Row (Original Layout) -->
+          <div class="hidden lg:flex gap-2 flex-1">
+            <div class="flex-1 relative">
+              <p-iconfield iconPosition="left" class="w-full">
+                <p-inputicon class="pi pi-search" />
+                <input 
+                  type="text"
+                  pInputText
+                  [formControl]="searchControl"
+                  [placeholder]="'PRODUCTS.LIST.SEARCH_PLACEHOLDER' | translate"
+                  class="w-full pr-12"
+                  (keyup.enter)="onSearch()"
+                />
+              </p-iconfield>
+              
+              <!-- Clear Button Inside Input -->
+              @if (searchQuery()) {
+                <p-button
+                  icon="pi pi-times"
+                  severity="secondary"
+                  [text]="true"
+                  size="small"
+                  (click)="clearSearch()"
+                  [disabled]="loading()"
+                  class="!absolute !right-2 !top-1/2 !-translate-y-1/2 !w-7 !h-7 !p-0 !min-w-0 !flex !items-center !justify-center !rounded-full"
+                  [ariaLabel]="'PRODUCTS.LIST.CLEAR_SEARCH' | translate">
+                </p-button>
+              }
+            </div>
+            
+            <!-- Category Filter Dropdown - Desktop -->
+            <div class="w-48">
+              <p-select
+                [options]="categories()"
+                [ngModel]="categoryFilter()[0] || null"
+                (ngModelChange)="onCategoryChange($event)"
+                optionLabel="name"
+                optionValue="_id"
+                [placeholder]="'PRODUCTS.LIST.CATEGORY_FILTER' | translate"
+                [showClear]="true"
+                [disabled]="categoriesLoading()"
+                class="w-full">
+              </p-select>
+            </div>
+            
+            <!-- Brand Filter Dropdown - Desktop -->
+            <div class="w-48">
+              <p-select
+                [options]="brands()"
+                [ngModel]="brandFilter() || null"
+                (ngModelChange)="onBrandChange($event)"
+                optionLabel="name"
+                optionValue="_id"
+                [placeholder]="'PRODUCTS.LIST.BRAND_FILTER' | translate"
+                [showClear]="true"
+                [disabled]="brandsLoading()"
+                class="w-full">
+              </p-select>
+            </div>
+            
+            <!-- Sort Dropdown - Desktop -->
+            <div class="w-40">
+              <p-select
+                [options]="sortOptions()"
+                [ngModel]="sortBy()"
+                (ngModelChange)="onSortChange($event)"
+                optionLabel="label"
+                optionValue="value"
+                [placeholder]="'PRODUCTS.LIST.SORT_BY' | translate"
+                class="w-full">
+              </p-select>
+            </div>
+          </div>
+          
+        </div>
+        
+      </div>
+      
+    </div>
+  </div>
+
+  <!-- Main Content Area -->
+  <div class="py-8">
+    <div class="max-w-7xl mx-auto px-4">
+      
+      <!-- Loading State with Skeleton Grid -->
+      @if (loading()) {
+        <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3 sm:gap-4 md:gap-6">
+          @for (item of generateSkeletonItems(); track item) {
+            <p-card class="shadow-sm h-96">
+              <p-skeleton height="12rem" styleClass="mb-4 rounded-lg"></p-skeleton>
+              <p-skeleton width="70%" height="1rem" styleClass="mb-3"></p-skeleton>
+              <p-skeleton width="90%" height="0.875rem" styleClass="mb-3"></p-skeleton>
+              <div class="flex justify-between items-center mb-4">
+                <p-skeleton width="40%" height="1.25rem"></p-skeleton>
+                <p-skeleton width="25%" height="0.875rem"></p-skeleton>
+              </div>
+              <p-skeleton height="2.5rem" styleClass="rounded-lg"></p-skeleton>
+            </p-card>
+          }
+        </div>
+      }
+      
+      <!-- Error State -->
+      @else if (error()) {
+        <div class="text-center py-20">
+          <div class="max-w-md mx-auto">
+            <div class="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-6">
+              <i class="pi pi-exclamation-triangle text-2xl text-red-600"></i>
+            </div>
+            <h3 class="text-xl font-semibold text-color mb-4">
+              {{ 'PRODUCTS.ERRORS.SOMETHING_WRONG' | translate }}
+            </h3>
+            <p-message
+              severity="error"
+              [text]="error()"
+              styleClass="mb-6 text-left">
+            </p-message>
+            <p-button
+              [label]="'PRODUCTS.ERRORS.TRY_AGAIN' | translate"
+              icon="pi pi-refresh"
+              (click)="retryLoading()"
+              severity="primary"
+              [outlined]="true">
+            </p-button>
+          </div>
+        </div>
+      }
+      
+      <!-- Empty State -->
+      @else if (!hasProducts() && !loading()) {
+        <div class="text-center py-20">
+          <div class="max-w-md mx-auto">
+            <div class="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-8 border-2 border-surface">
+              <i class="pi pi-search text-3xl text-muted-color"></i>
+            </div>
+            <h3 class="text-2xl font-bold text-color mb-4">
+              @if (searchQuery()) {
+                {{ 'PRODUCTS.LIST.NO_PRODUCTS_FOUND' | translate }}
+              } @else {
+                {{ 'PRODUCTS.LIST.NO_PRODUCTS_AVAILABLE' | translate }}
+              }
+            </h3>
+            <p class="text-muted-color mb-8 leading-relaxed">
+              @if (searchQuery()) {
+                {{ 'PRODUCTS.LIST.SEARCH_NO_RESULTS' | translate }}
+              } @else {
+                {{ 'PRODUCTS.LIST.EMPTY_MESSAGE' | translate }}
+              }
+            </p>
+            @if (searchQuery()) {
+              <p-button
+                [label]="'PRODUCTS.LIST.CLEAR_SEARCH_BUTTON' | translate"
+                icon="pi pi-times"
+                (click)="clearSearch()"
+                severity="primary"
+                [outlined]="true">
+              </p-button>
+            }
+          </div>
+        </div>
+      }
+      
+      <!-- Products Grid -->
+      @else if (hasProducts()) {
+        <div class="space-y-8">
+          
+          <!-- Products Grid -->
+          <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3 sm:gap-4 md:gap-6">
+            @for (product of products(); track product._id) {
+              <app-product-card [product]="product"></app-product-card>
+            }
+          </div>
+          
+          <!-- Pagination -->
+          @if (totalPages() > 1) {
+            <div class="mt-12 border-t border-surface pt-8">
+              <div class="flex flex-col items-center gap-4">
+                <p-paginator
+                  [rows]="itemsPerPage()"
+                  [totalRecords]="totalProducts()"
+                  [first]="(currentPage() - 1) * itemsPerPage()"
+                  (onPageChange)="onPageChange($event)"
+                  [showCurrentPageReport]="true"
+                  [currentPageReportTemplate]="'PRODUCTS.LIST.PAGINATION_TEMPLATE' | translate"
+                  [showJumpToPageDropdown]="false"
+                  [showFirstLastIcon]="true"
+                  [showPageLinks]="true"
+                  ariaLabel="Product list pagination navigation"
+                  class="bg-transparent border-0">
+                </p-paginator>
+              </div>
+            </div>
+          }
+          
+        </div>
+      }
+      
+    </div>
+  </div>
+  
+</div>

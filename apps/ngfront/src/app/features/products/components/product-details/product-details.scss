@@ -1,0 +1,12 @@
+// Enhanced Product Details - Pure PrimeNG + Tailwind CSS
+// Following Tailwind CSS First rule - minimal custom CSS
+
+// Rating component customization (required for PrimeNG component theming)
+:host ::ng-deep p-rating {
+  --p-rating-icon-color: #d1d5db; // gray-300 for inactive stars  
+  --p-rating-icon-hover-color: #FFC107; // Material Design amber (industry standard)
+  --p-rating-icon-active-color: #FFC107; // Material Design amber (industry standard)
+}
+
+// All animations, layout, and styling handled by PrimeNG components and Tailwind classes
+// Use Tailwind utilities: animate-pulse, hover:scale-110, transition-transform, etc.

@@ -1,0 +1,189 @@
+<div class="min-h-screen flex items-center justify-center bg-surface-ground py-12 px-4 sm:px-6 lg:px-8">
+  <div class="max-w-md w-full space-y-4">
+    <!-- Header -->
+    <div class="text-center">
+      <h2 class="text-3xl font-extrabold text-color">
+        {{ 'AUTH.REGISTER.TITLE' | translate }}
+      </h2>
+      <p class="mt-2 text-sm text-muted-color">
+        {{ 'AUTH.REGISTER.SUBTITLE' | translate }}
+      </p>
+    </div>
+
+    <!-- Registration Form Card -->
+    <p-card class="shadow-lg">
+      <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="space-y-6">
+        
+        <!-- Full Name Field -->
+        <div class="space-y-1">
+          <label for="name" class="block text-sm font-medium text-color">{{ 'AUTH.REGISTER.FULL_NAME' | translate }}</label>
+          <input 
+            id="name"
+            pInputText 
+            formControlName="name"
+            [placeholder]="'AUTH.REGISTER.FULL_NAME_PLACEHOLDER' | translate"
+            class="w-full"
+            [class.p-invalid]="isFieldInvalid('name')"
+          />
+          @if (isFieldInvalid('name')) {
+            <small class="text-red-500">
+              @if (registerForm.get('name')?.errors?.['required']) {
+                {{ 'AUTH.REGISTER.ERRORS.NAME_REQUIRED' | translate }}
+              }
+              @if (registerForm.get('name')?.errors?.['minlength']) {
+                {{ 'AUTH.REGISTER.ERRORS.NAME_MIN_LENGTH' | translate }}
+              }
+            </small>
+          }
+        </div>
+
+        <!-- Email Field -->
+        <div class="space-y-1">
+          <label for="email" class="block text-sm font-medium text-color">{{ 'AUTH.REGISTER.EMAIL' | translate }}</label>
+          <input 
+            id="email"
+            pInputText 
+            formControlName="email"
+            [placeholder]="'AUTH.REGISTER.EMAIL_PLACEHOLDER' | translate"
+            type="email"
+            class="w-full"
+            [class.p-invalid]="isFieldInvalid('email')"
+          />
+          @if (isFieldInvalid('email')) {
+            <small class="text-red-500">
+              @if (registerForm.get('email')?.errors?.['required']) {
+                {{ 'AUTH.REGISTER.ERRORS.EMAIL_REQUIRED' | translate }}
+              }
+              @if (registerForm.get('email')?.errors?.['email']) {
+                {{ 'AUTH.REGISTER.ERRORS.EMAIL_INVALID' | translate }}
+              }
+            </small>
+          }
+        </div>
+
+        <!-- Phone Field -->
+        <div class="space-y-1">
+          <label for="phone" class="block text-sm font-medium text-color">{{ 'AUTH.REGISTER.PHONE' | translate }}</label>
+          <input 
+            id="phone"
+            pInputText 
+            formControlName="phone"
+            [placeholder]="'AUTH.REGISTER.PHONE_PLACEHOLDER' | translate"
+            class="w-full"
+            [class.p-invalid]="isFieldInvalid('phone')"
+          />
+          @if (isFieldInvalid('phone')) {
+            <small class="text-red-500">
+              @if (registerForm.get('phone')?.errors?.['required']) {
+                {{ 'AUTH.REGISTER.ERRORS.PHONE_REQUIRED' | translate }}
+              }
+              @if (registerForm.get('phone')?.errors?.['egyptianPhone']) {
+                {{ 'AUTH.REGISTER.ERRORS.PHONE_INVALID' | translate }}
+              }
+            </small>
+          }
+        </div>
+
+        <!-- Password Field -->
+        <div class="space-y-1">
+          <label for="password" class="block text-sm font-medium text-color">{{ 'AUTH.REGISTER.PASSWORD' | translate }}</label>
+          <p-password 
+            id="password"
+            formControlName="password"
+            [placeholder]="'AUTH.REGISTER.PASSWORD_PLACEHOLDER' | translate"
+            [toggleMask]="true"
+            [feedback]="true"
+            class="w-full"
+            [inputStyle]="{ width: '100%' }"
+            [style]="{ width: '100%' }"
+          />
+          @if (isFieldInvalid('password')) {
+            <small class="text-red-500">
+              @if (registerForm.get('password')?.errors?.['required']) {
+                {{ 'AUTH.REGISTER.ERRORS.PASSWORD_REQUIRED' | translate }}
+              }
+              @if (registerForm.get('password')?.errors?.['minlength']) {
+                {{ 'AUTH.REGISTER.ERRORS.PASSWORD_MIN_LENGTH' | translate }}
+              }
+              @if (registerForm.get('password')?.errors?.['strongPassword']) {
+                {{ 'AUTH.REGISTER.ERRORS.PASSWORD_PATTERN' | translate }}
+              }
+            </small>
+          }
+        </div>
+
+        <!-- Confirm Password Field -->
+        <div class="space-y-1">
+          <label for="rePassword" class="block text-sm font-medium text-color">{{ 'AUTH.REGISTER.CONFIRM_PASSWORD' | translate }}</label>
+          <p-password 
+            id="rePassword"
+            formControlName="rePassword"
+            [placeholder]="'AUTH.REGISTER.CONFIRM_PASSWORD_PLACEHOLDER' | translate"
+            [toggleMask]="true"
+            [feedback]="false"
+            class="w-full"
+            [inputStyle]="{ width: '100%' }"
+            [style]="{ width: '100%' }"
+          />
+          @if (isFieldInvalid('rePassword')) {
+            <small class="text-red-500">
+              @if (registerForm.get('rePassword')?.errors?.['required']) {
+                {{ 'AUTH.REGISTER.ERRORS.CONFIRM_PASSWORD_REQUIRED' | translate }}
+              }
+              @if (registerForm.get('rePassword')?.errors?.['passwordMismatch']) {
+                {{ 'AUTH.REGISTER.ERRORS.PASSWORD_MISMATCH' | translate }}
+              }
+            </small>
+          }
+        </div>
+
+        <!-- Error Message -->
+        @if (errorMessage()) {
+          <p-message 
+            severity="error" 
+            [text]="errorMessage()"
+            class="w-full"
+          />
+        }
+
+        <!-- Success Message -->
+        @if (successMessage()) {
+          <p-message 
+            severity="success" 
+            [text]="successMessage()"
+            class="w-full"
+          />
+        }
+
+        <!-- severity="success" to make the button green -->
+
+        <!-- Submit Button -->
+        <div>
+          <p-button 
+            type="submit"
+            [label]="'AUTH.REGISTER.CREATE_ACCOUNT' | translate"
+            icon="pi pi-user-plus"
+            [loading]="isLoading()"
+            [disabled]="registerForm.invalid || isLoading()"
+            styleClass="w-full p-button-lg"
+          />
+        </div>
+
+        <!-- Login Link -->
+        <div class="text-center">
+          <span class="text-sm text-muted-color">
+            {{ 'AUTH.REGISTER.HAVE_ACCOUNT' | translate }}
+          </span>
+          <p-button 
+            [label]="'AUTH.REGISTER.SIGN_IN' | translate"
+            (onClick)="navigateToLogin()"
+            [text]="true"
+            severity="primary"
+            size="small"
+            styleClass="!p-0 !h-auto !ml-1" />
+        </div>
+      </form>
+    </p-card>
+  </div>
+</div>
+

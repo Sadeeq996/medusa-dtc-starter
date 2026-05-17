@@ -1,0 +1,11 @@
+// Enhanced Product Card - Pure PrimeNG + Tailwind CSS
+// Following Tailwind CSS First rule - minimal custom CSS
+
+// Rating component customization (required for PrimeNG component theming)
+:host ::ng-deep p-rating {
+  --p-rating-icon-color: var(--surface-300); // Use PrimeNG design token for inactive stars  
+  --p-rating-icon-hover-color: #FFC107; // Material Design amber (industry standard)
+  --p-rating-icon-active-color: #FFC107; // Material Design amber (industry standard)
+}
+
+// All layout, responsive design, and styling handled by PrimeNG + Tailwind classes

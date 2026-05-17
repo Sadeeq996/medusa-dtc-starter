@@ -1,0 +1,163 @@
+<!-- Wishlist Page - Compact Design using Product Card Component -->
+<div class="min-h-screen">
+
+  <!-- Page Header -->
+  <div class="border-b border-surface shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 py-6">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <i class="pi pi-heart text-2xl text-primary"></i>
+          <h1 class="text-2xl font-bold text-color">
+            {{ 'WISHLIST.TITLE' | translate }}
+          </h1>
+          @if (!isEmpty()) {
+            <p-badge [value]="wishlistSummary().totalItems" size="large"></p-badge>
+          }
+        </div>
+        <p-button 
+          [label]="'WISHLIST.CONTINUE_SHOPPING' | translate"
+          severity="secondary"
+          [outlined]="true"
+          icon="pi pi-arrow-left"
+          (click)="continueShopping()"
+          size="small">
+        </p-button>
+      </div>
+    </div>
+  </div>
+
+  <div class="max-w-7xl mx-auto px-4 py-8">
+
+    <!-- Error Message -->
+    @if (error()) {
+      <div class="mb-6">
+        <p-message 
+          severity="error" 
+          [text]="error() || ''"
+          [closable]="true"
+          (onClose)="clearError()">
+        </p-message>
+      </div>
+    }
+
+    <!-- Loading State -->
+    @if (showLoadingState()) {
+      <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3 sm:gap-4 md:gap-6">
+        @for (i of [1,2,3,4,5,6,7,8,9,10,11,12]; track i) {
+          <p-card class="shadow-sm h-96">
+            <p-skeleton width="100%" height="12rem" styleClass="mb-4 rounded-lg"></p-skeleton>
+            <p-skeleton width="100%" height="20px"></p-skeleton>
+            <p-skeleton width="60%" height="16px"></p-skeleton>
+            <p-skeleton width="80%" height="16px"></p-skeleton>
+          </p-card>
+        }
+      </div>
+    }
+
+    <!-- Empty State -->
+    @else if (showEmptyState()) {
+      <div class="max-w-2xl mx-auto text-center">
+        
+        <!-- Empty Icon and Header -->
+        <div class="mb-6">
+          <div class="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+            <i class="pi pi-heart text-3xl text-primary"></i>
+          </div>
+          <h1 class="text-2xl font-bold text-color mb-3">
+            {{ 'WISHLIST.EMPTY_TITLE' | translate }}
+          </h1>
+          <p class="text-base text-muted-color">
+            {{ 'WISHLIST.EMPTY_MESSAGE' | translate }}
+          </p>
+        </div>
+
+        <!-- Suggestions Card -->
+        <p-card class="mb-6 shadow-sm">
+          <ng-template pTemplate="header">
+            <div class="flex items-center gap-2 p-3 bg-emphasis">
+              <i class="pi pi-lightbulb text-primary"></i>
+              <h3 class="font-semibold text-color text-sm">
+                {{ 'WISHLIST.EMPTY_SUGGESTIONS.TITLE' | translate }}
+              </h3>
+            </div>
+          </ng-template>
+          
+          <div class="text-left space-y-3 p-4">
+            <p class="text-sm text-muted-color">
+              {{ 'WISHLIST.EMPTY_SUGGESTIONS.DESCRIPTION' | translate }}
+            </p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+              <div class="flex items-start gap-2 p-3 bg-emphasis rounded-lg">
+                <i class="pi pi-heart text-xl text-primary flex-shrink-0 mt-0.5"></i>
+                <div class="min-w-0">
+                  <h4 class="font-medium text-color text-sm mb-0.5">
+                    {{ 'WISHLIST.EMPTY_SUGGESTIONS.SAVE_TITLE' | translate }}
+                  </h4>
+                  <p class="text-xs text-muted-color">
+                    {{ 'WISHLIST.EMPTY_SUGGESTIONS.SAVE_DESCRIPTION' | translate }}
+                  </p>
+                </div>
+              </div>
+              
+              <div class="flex items-start gap-2 p-3 bg-emphasis rounded-lg">
+                <i class="pi pi-bell text-xl text-green-600 flex-shrink-0 mt-0.5"></i>
+                <div class="min-w-0">
+                  <h4 class="font-medium text-color text-sm mb-0.5">
+                    {{ 'WISHLIST.EMPTY_SUGGESTIONS.NOTIFY_TITLE' | translate }}
+                  </h4>
+                  <p class="text-xs text-muted-color">
+                    {{ 'WISHLIST.EMPTY_SUGGESTIONS.NOTIFY_DESCRIPTION' | translate }}
+                  </p>
+                </div>
+              </div>
+              
+              <div class="flex items-start gap-2 p-3 bg-emphasis rounded-lg">
+                <i class="pi pi-shopping-cart text-xl text-blue-600 flex-shrink-0 mt-0.5"></i>
+                <div class="min-w-0">
+                  <h4 class="font-medium text-color text-sm mb-0.5">
+                    {{ 'WISHLIST.EMPTY_SUGGESTIONS.QUICK_ADD_TITLE' | translate }}
+                  </h4>
+                  <p class="text-xs text-muted-color">
+                    {{ 'WISHLIST.EMPTY_SUGGESTIONS.QUICK_ADD_DESCRIPTION' | translate }}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </p-card>
+
+        <!-- Action Button -->
+        <p-button 
+          [label]="'WISHLIST.START_SHOPPING' | translate"
+          severity="primary"
+          icon="pi pi-shopping-bag"
+          (click)="continueShopping()"
+          size="large">
+        </p-button>
+
+      </div>
+    }
+
+    <!-- Wishlist Content - Product Grid using Product Card Component -->
+    @else if (!isEmpty()) {
+      <div class="mb-6">
+        <h2 class="text-lg font-semibold text-color">
+          @if (wishlistSummary().totalItems === 1) {
+            {{ 'WISHLIST.ITEMS_COUNT_SINGULAR' | translate }}
+          } @else {
+            {{ 'WISHLIST.ITEMS_COUNT_PLURAL' | translate: { count: wishlistSummary().totalItems } }}
+          }
+        </h2>
+      </div>
+
+      <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3 sm:gap-4 md:gap-6">
+        @for (product of wishlistItems(); track trackByProductId($index, product)) {
+          <app-product-card [product]="product" />
+        }
+      </div>
+    }
+
+  </div>
+</div>
+

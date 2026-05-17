@@ -1,0 +1,13 @@
+/* You can add global styles to this file, and also import other style files */
+
+@import "tailwindcss";
+@plugin "tailwindcss-primeui";  /* Official PrimeNG-Tailwind integration */
+@import "primeicons/primeicons.css"; /* PrimeIcons CSS for icon support */
+
+[lang="ar"] {
+  font-family: 'IBM Plex Sans Arabic', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+[lang="en"] {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}

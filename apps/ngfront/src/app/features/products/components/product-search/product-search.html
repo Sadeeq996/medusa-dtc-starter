@@ -1,0 +1,395 @@
+<!-- Product Search Page -->
+<div class="min-h-screen bg-surface-ground">
+  
+  <!-- Search Header -->
+  <div class="sticky top-0 z-[100] shadow-sm border-b border-surface backdrop-blur-sm">
+    <div class="max-w-7xl mx-auto px-4 py-6">
+      
+      <!-- Main Search Bar -->
+      <div class="mb-6">
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+          
+          <!-- Search Input with Autocomplete - Mobile First -->
+          <div class="flex-1 max-w-2xl">
+            <p-autoComplete
+              [formControl]="searchControl"
+              [suggestions]="suggestions()"
+              (completeMethod)="onSearchSuggestion($event)"
+              (onSelect)="onSuggestionSelect($event)"
+              [placeholder]="'PRODUCTS.SEARCH.PLACEHOLDER' | translate"
+              [dropdown]="true"
+              [showEmptyMessage]="true"
+              [emptyMessage]="'PRODUCTS.SEARCH.NO_SUGGESTIONS' | translate"
+              class="w-full">
+              
+              <ng-template #item let-suggestion>
+                <div class="flex items-center gap-2 p-3 transition-colors hover:bg-primary-50">
+                  <i class="pi pi-search text-muted-color"></i>
+                  <span>{{ suggestion }}</span>
+                </div>
+              </ng-template>
+              
+            </p-autoComplete>
+          </div>
+          
+          <!-- Mobile-Optimized Action Buttons -->
+          <div class="flex gap-2 sm:gap-3">
+            <!-- Filters Toggle Button -->
+            <p-button
+              [icon]="showFilters() ? 'pi pi-times' : 'pi pi-filter'"
+              [label]="showFilters() ? ('PRODUCTS.SEARCH.HIDE_FILTERS' | translate) : ('PRODUCTS.SEARCH.SHOW_FILTERS' | translate)"
+              (click)="toggleFilters()"
+              severity="secondary"
+              [outlined]="true"
+              size="small"
+              class="sm:!text-sm"
+              [badge]="activeFiltersCount() > 0 ? activeFiltersCount().toString() : undefined"
+              badgeClass="p-badge-danger">
+            </p-button>
+          </div>
+          
+        </div>
+        
+        <!-- Recent Searches -->
+        @if (recentSearches().length > 0 && !searchQuery()) {
+          <div class="mt-4">
+            <div class="flex items-center gap-2 mb-2">
+              <span class="text-sm font-medium text-muted-color">{{ 'PRODUCTS.SEARCH.RECENT_SEARCHES' | translate }}</span>
+              <p-button
+                [label]="'PRODUCTS.SEARCH.CLEAR' | translate"
+                (click)="clearRecentSearches()"
+                severity="secondary"
+                [text]="true"
+                size="small">
+              </p-button>
+            </div>
+            <div class="flex flex-wrap gap-2">
+              @for (search of recentSearches(); track search) {
+                <p-chip
+                  [label]="search"
+                  (click)="useRecentSearch(search)"
+                  [removable]="false"
+                  class="cursor-pointer hover:bg-primary-50 transition-colors">
+                </p-chip>
+              }
+            </div>
+          </div>
+        }
+        
+      </div>
+      
+      <!-- Search Results Header -->
+      @if (searchQuery()) {
+        <div class="results-header flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          
+          <!-- Results Count -->
+          <div class="results-info">
+            @if (loading()) {
+              <p-skeleton width="200px" height="1rem"></p-skeleton>
+            } @else if (hasProducts()) {
+              <h2 class="text-lg font-semibold text-color">
+                {{ 'PRODUCTS.SEARCH.RESULTS_FOR' | translate: {count: totalProducts(), query: searchQuery()} }}
+              </h2>
+            } @else if (!error()) {
+              <h2 class="text-lg font-semibold text-color">
+                {{ 'PRODUCTS.SEARCH.NO_RESULTS_FOR' | translate: {query: searchQuery()} }}
+              </h2>
+            }
+          </div>
+          
+          <!-- Sort Options -->
+          @if (hasProducts() && !loading()) {
+            <div class="sort-section flex items-center gap-2">
+              <label class="text-sm font-medium text-color">
+                {{ 'PRODUCTS.SEARCH.SORT_BY' | translate }}
+              </label>
+              <p-select
+                [options]="sortOptions()"
+                [ngModel]="sortBy()"
+                (ngModelChange)="onSortChange($event)"
+                optionLabel="label"
+                optionValue="value"
+                [style]="{ minWidth: '160px' }">
+              </p-select>
+            </div>
+          }
+          
+        </div>
+      }
+      
+      <!-- Active Filters -->
+      @if (hasActiveFilters()) {
+        <div class="active-filters mt-4">
+          <div class="flex items-center gap-2 mb-2">
+            <span class="text-sm font-medium text-muted-color">{{ 'PRODUCTS.SEARCH.ACTIVE_FILTERS' | translate }}</span>
+            <p-button
+              [label]="'PRODUCTS.SEARCH.CLEAR_ALL' | translate"
+              (click)="clearFilters()"
+              severity="danger"
+              [text]="true"
+              size="small">
+            </p-button>
+          </div>
+          <div class="flex flex-wrap gap-2">
+            @for (category of filters().categories; track category) {
+              <p-chip
+                [label]="('PRODUCTS.SEARCH.CATEGORY_PREFIX' | translate) + category"
+                [removable]="true"
+                (onRemove)="removeCategory(category)"
+                icon="pi pi-tag">
+              </p-chip>
+            }
+            @for (brand of filters().brands; track brand) {
+              <p-chip
+                [label]="('PRODUCTS.SEARCH.BRAND_PREFIX' | translate) + brand"
+                [removable]="true"
+                (onRemove)="removeBrand(brand)"
+                icon="pi pi-star">
+              </p-chip>
+            }
+            @if (filters().rating > 0) {
+              <p-chip
+                [label]="('PRODUCTS.SEARCH.RATING_PREFIX' | translate) + filters().rating + ('PRODUCTS.SEARCH.RATING_SUFFIX' | translate)"
+                [removable]="true"
+                (onRemove)="updateFilters({ rating: 0 })"
+                icon="pi pi-star-fill">
+              </p-chip>
+            }
+            @if (filters().inStock) {
+              <p-chip
+                [label]="'PRODUCTS.SEARCH.IN_STOCK_FILTER' | translate"
+                [removable]="true"
+                (onRemove)="updateFilters({ inStock: false })"
+                icon="pi pi-check">
+              </p-chip>
+            }
+            @if (filters().onSale) {
+              <p-chip
+                [label]="'PRODUCTS.SEARCH.ON_SALE_FILTER' | translate"
+                [removable]="true"
+                (onRemove)="updateFilters({ onSale: false })"
+                icon="pi pi-percentage">
+              </p-chip>
+            }
+          </div>
+        </div>
+      }
+      
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="min-h-screen py-8">
+    <div class="max-w-7xl mx-auto px-4">
+      
+      <!-- Welcome State (No Search) -->
+      @if (!searchQuery()) {
+        <div class="text-center py-16">
+          <i class="pi pi-search text-6xl text-muted-color mb-6 opacity-60 animate-pulse"></i>
+          <h2 class="text-3xl font-bold text-color mb-4">
+            {{ 'PRODUCTS.SEARCH.WELCOME_TITLE' | translate }}
+          </h2>
+          <p class="text-muted-color max-w-md mx-auto">
+            {{ 'PRODUCTS.SEARCH.WELCOME_MESSAGE' | translate }}
+          </p>
+        </div>
+      }
+      
+      <!-- Loading State -->
+      @else if (loading()) {
+        <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 md:gap-6">
+          @for (item of generateSkeletonItems(); track item) {
+            <p-card class="h-96">
+              <p-skeleton height="200px" class="mb-4"></p-skeleton>
+              <p-skeleton width="80%" height="1rem" class="mb-3"></p-skeleton>
+              <p-skeleton width="60%" height="1rem" class="mb-3"></p-skeleton>
+              <div class="flex justify-between items-center">
+                <p-skeleton width="40%" height="1.25rem"></p-skeleton>
+                <p-skeleton width="20%" height="1rem"></p-skeleton>
+              </div>
+              <p-skeleton height="2.5rem" class="mt-4"></p-skeleton>
+            </p-card>
+          }
+        </div>
+      }
+      
+      <!-- Error State -->
+      @else if (error()) {
+        <div class="text-center py-16">
+          <p-message
+            severity="error"
+            [text]="error()"
+            class="max-w-md mx-auto mb-6 inline-block">
+          </p-message>
+          <p-button
+            [label]="'PRODUCTS.ERRORS.TRY_AGAIN' | translate"
+            icon="pi pi-refresh"
+            (click)="performSearch()"
+            severity="secondary">
+          </p-button>
+        </div>
+      }
+      
+      <!-- No Results State -->
+      @else if (!hasProducts()) {
+        <div class="text-center py-16">
+          <i class="pi pi-search text-6xl text-muted-color mb-6 opacity-50"></i>
+          <h3 class="text-2xl font-semibold text-color mb-4">
+            {{ 'PRODUCTS.SEARCH.NO_PRODUCTS_TITLE' | translate }}
+          </h3>
+          <div class="max-w-md mx-auto text-muted-color mb-6">
+            <p class="mb-4">{{ 'PRODUCTS.SEARCH.NO_PRODUCTS_MESSAGE' | translate: {query: searchQuery()} }}</p>
+            <p>{{ 'PRODUCTS.SEARCH.SEARCH_TIPS_TITLE' | translate }}</p>
+            <ul class="text-left list-disc list-inside space-y-1 text-muted-color">
+              <li>{{ 'PRODUCTS.SEARCH.SEARCH_TIP_1' | translate }}</li>
+              <li>{{ 'PRODUCTS.SEARCH.SEARCH_TIP_2' | translate }}</li>
+              <li>{{ 'PRODUCTS.SEARCH.SEARCH_TIP_3' | translate }}</li>
+              <li>{{ 'PRODUCTS.SEARCH.SEARCH_TIP_4' | translate }}</li>
+            </ul>
+          </div>
+          @if (hasActiveFilters()) {
+            <p-button
+              [label]="'PRODUCTS.SEARCH.CLEAR_FILTERS' | translate"
+              icon="pi pi-filter-slash"
+              (click)="clearFilters()"
+              severity="secondary"
+              [outlined]="true">
+            </p-button>
+          }
+        </div>
+      }
+      
+      <!-- Search Results -->
+      @else {
+        <div class="animate-in fade-in duration-500">
+          
+          <!-- Products Grid -->
+          <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 md:gap-6">
+            @for (product of products(); track product._id) {
+              <app-product-card [product]="product"></app-product-card>
+            }
+          </div>
+          
+          <!-- Pagination -->
+          @if (totalPages() > 1) {
+            <div class="flex justify-center mt-12">
+              <p-paginator
+                [rows]="itemsPerPage()"
+                [totalRecords]="totalProducts()"
+                [first]="(currentPage() - 1) * itemsPerPage()"
+                (onPageChange)="onPageChange($event)"
+                [showCurrentPageReport]="true"
+                [currentPageReportTemplate]="'PRODUCTS.SEARCH.PAGINATION_TEMPLATE' | translate"
+                [showJumpToPageDropdown]="totalPages() > 5"
+                [showFirstLastIcon]="true"
+                [rowsPerPageOptions]="rowsPerPageOptions()"
+                class="surface-card border-round"
+                ariaLabel="Search results pagination navigation">
+              </p-paginator>
+            </div>
+          }
+          
+        </div>
+      }
+      
+    </div>
+  </div>
+
+  <!-- Filters Sidebar -->
+  <p-drawer
+    [visible]="showFilters()"
+    (onHide)="toggleFilters()"
+    position="right"
+    [modal]="true"
+    [showCloseIcon]="true"
+    class="w-full md:w-96">
+    
+    <ng-template #header>
+      <div class="flex items-center justify-between w-full">
+        <h3 class="text-lg font-semibold">{{ 'PRODUCTS.SEARCH.FILTERS_TITLE' | translate }}</h3>
+        @if (hasActiveFilters()) {
+          <p-button
+            [label]="'PRODUCTS.SEARCH.CLEAR_ALL' | translate"
+            (click)="clearFilters()"
+            severity="danger"
+            [text]="true"
+            size="small">
+          </p-button>
+        }
+      </div>
+    </ng-template>
+    
+    <!-- Filter Content -->
+    <div class="space-y-6 py-4 px-6">
+      
+      <!-- Price Range -->
+      <div>
+        <h4 class="font-medium text-color mb-3 text-base">{{ 'PRODUCTS.SEARCH.PRICE_RANGE' | translate }}</h4>
+        <div class="px-2">
+          <p-slider
+            [(ngModel)]="filters().priceRange"
+            [range]="true"
+            [min]="0"
+            [max]="10000"
+            [step]="100"
+            (onSlideEnd)="onPriceRangeChange($event)"
+            class="w-full">
+          </p-slider>
+          <div class="flex justify-between text-sm text-muted-color mt-2">
+            <span>{{ filters().priceRange.min | currency:'EGP':'symbol':'1.0-0' }}</span>
+            <span>{{ filters().priceRange.max | currency:'EGP':'symbol':'1.0-0' }}</span>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Rating Filter -->
+      <div>
+        <h4 class="font-medium text-color mb-3 text-base">{{ 'PRODUCTS.SEARCH.MINIMUM_RATING' | translate }}</h4>
+        <div class="space-y-2">
+          @for (rating of [4, 3, 2, 1]; track rating) {
+            <label class="flex items-center gap-2 cursor-pointer py-2 px-0 rounded-md transition-all hover:bg-surface-50 hover:px-2">
+              <p-checkbox
+                [value]="rating"
+                [ngModel]="filters().rating >= rating"
+                (ngModelChange)="onRatingChange(rating, $event)"
+                [binary]="true">
+              </p-checkbox>
+              <div class="flex items-center gap-1">
+                @for (star of [1,2,3,4,5]; track star) {
+                  <i [class]="'pi text-sm ' + (star <= rating ? 'pi-star-fill text-yellow-500' : 'pi-star text-muted-color')"></i>
+                }
+                <span class="text-sm text-muted-color ml-1">{{ 'PRODUCTS.SEARCH.RATING_AND_UP' | translate }}</span>
+              </div>
+            </label>
+          }
+        </div>
+      </div>
+      
+      <!-- Availability -->
+      <div>
+        <h4 class="font-medium text-color mb-3 text-base">{{ 'PRODUCTS.SEARCH.AVAILABILITY' | translate }}</h4>
+        <div class="space-y-2">
+          <label class="flex items-center gap-2 cursor-pointer py-2 px-0 rounded-md transition-all hover:bg-surface-50 hover:px-2">
+            <p-checkbox
+              [ngModel]="filters().inStock"
+              (ngModelChange)="onInStockChange($event)"
+              [binary]="true">
+            </p-checkbox>
+            <span class="text-sm">{{ 'PRODUCTS.SEARCH.IN_STOCK_FILTER' | translate }}</span>
+          </label>
+          <label class="flex items-center gap-2 cursor-pointer py-2 px-0 rounded-md transition-all hover:bg-surface-50 hover:px-2">
+            <p-checkbox
+              [ngModel]="filters().onSale"
+              (ngModelChange)="onSaleChange($event)"
+              [binary]="true">
+            </p-checkbox>
+            <span class="text-sm">{{ 'PRODUCTS.SEARCH.ON_SALE_FILTER' | translate }}</span>
+          </label>
+        </div>
+      </div>
+      
+    </div>
+    
+  </p-drawer>
+  
+</div>

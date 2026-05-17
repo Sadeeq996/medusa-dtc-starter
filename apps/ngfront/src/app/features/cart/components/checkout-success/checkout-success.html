@@ -1,0 +1,120 @@
+<div class="min-h-screen">
+  <div class="container mx-auto px-4 py-12">
+    
+    <div class="max-w-2xl mx-auto text-center">
+      
+      <!-- Success Icon and Header -->
+      <div class="mb-8">
+        <div class="w-24 h-24 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-6 animate-bounce">
+          <i class="pi pi-check text-4xl text-white"></i>
+        </div>
+        <h1 class="text-3xl font-bold text-color mb-4">
+          {{ 'ORDER_SUCCESS.TITLE' | translate }}
+        </h1>
+        <p class="text-lg text-muted-color">
+          {{ 'ORDER_SUCCESS.MESSAGE' | translate }}
+        </p>
+      </div>
+
+      <!-- Order Details Card -->
+      <p-card class="mb-8 shadow-sm">
+        <ng-template pTemplate="header">
+          <div class="flex items-center gap-3 p-4 bg-emphasis">
+            <i class="pi pi-receipt text-primary"></i>
+            <h3 class="font-semibold text-color">{{ 'ORDER_SUCCESS.DETAILS_TITLE' | translate }}</h3>
+          </div>
+        </ng-template>
+        
+        <div class="space-y-4 text-left">
+          @if (orderId()) {
+            <div class="flex justify-between items-center">
+              <span class="text-muted-color font-medium">{{ 'ORDER_SUCCESS.ORDER_ID' | translate }}</span>
+              <p-badge 
+                [value]="orderId()!" 
+                severity="info"
+                class="font-mono">
+              </p-badge>
+            </div>
+          }
+          
+          @if (paymentMethod()) {
+            <div class="flex justify-between items-center">
+              <span class="text-muted-color font-medium">{{ 'ORDER_SUCCESS.PAYMENT_METHOD_LABEL' | translate }}</span>
+              <span class="font-semibold text-color">
+                {{ getPaymentMethodLabel() }}
+              </span>
+            </div>
+          }
+          
+          <div class="flex justify-between items-center">
+            <span class="text-muted-color font-medium">{{ 'ORDER_SUCCESS.ORDER_DATE' | translate }}</span>
+            <span class="font-semibold text-color">
+              {{ getCurrentDate() }}
+            </span>
+          </div>
+          
+          <p-divider></p-divider>
+          
+          @if (paymentMethod() === 'cash') {
+            <p-message 
+              severity="info" 
+              [text]="'ORDER_SUCCESS.CASH_MESSAGE' | translate"
+              class="text-left">
+            </p-message>
+          } @else {
+            <p-message 
+              severity="success" 
+              [text]="'ORDER_SUCCESS.CARD_MESSAGE' | translate"
+              class="text-left">
+            </p-message>
+          }
+        </div>
+      </p-card>
+
+      <!-- Next Steps -->
+      <div class="mb-8">
+        <h3 class="text-xl font-semibold text-color mb-4">
+          {{ 'ORDER_SUCCESS.NEXT_STEPS_TITLE' | translate }}
+        </h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+          <p-card class="shadow-sm">
+            <i class="pi pi-clock text-2xl text-primary mb-2"></i>
+            <h4 class="font-medium text-color mb-1">{{ 'ORDER_SUCCESS.PROCESSING_TITLE' | translate }}</h4>
+            <p class="text-sm text-muted-color">{{ 'ORDER_SUCCESS.PROCESSING_MESSAGE' | translate }}</p>
+          </p-card>
+          <p-card class="shadow-sm">
+            <i class="pi pi-truck text-2xl text-primary mb-2"></i>
+            <h4 class="font-medium text-color mb-1">{{ 'ORDER_SUCCESS.SHIPPING_TITLE' | translate }}</h4>
+            <p class="text-sm text-muted-color">{{ 'ORDER_SUCCESS.SHIPPING_MESSAGE' | translate }}</p>
+          </p-card>
+          <p-card class="shadow-sm">
+            <i class="pi pi-home text-2xl text-green-600 mb-2"></i>
+            <h4 class="font-medium text-color mb-1">{{ 'ORDER_SUCCESS.DELIVERED_TITLE' | translate }}</h4>
+            <p class="text-sm text-muted-color">{{ 'ORDER_SUCCESS.DELIVERED_MESSAGE' | translate }}</p>
+          </p-card>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex flex-col sm:flex-row gap-4 justify-center">
+        <p-button 
+          [label]="'ORDER_SUCCESS.CONTINUE_SHOPPING' | translate"
+          icon="pi pi-shopping-bag"
+          routerLink="/"
+          severity="primary"
+          size="large">
+        </p-button>
+        <p-button 
+          [label]="'ORDER_SUCCESS.VIEW_ORDERS' | translate"
+          icon="pi pi-list"
+          routerLink="/profile/orders"
+          severity="secondary"
+          [outlined]="true"
+          size="large">
+        </p-button>
+      </div>
+
+    </div>
+  </div>
+</div>
+

@@ -1,0 +1,114 @@
+<p-card>
+  <ng-template pTemplate="header">
+    <div class="flex items-center gap-3 p-4 bg-emphasis">
+      <i class="pi pi-map-marker text-primary"></i>
+      <h3 class="font-semibold text-color">{{ 'ADDRESS.FORM_TITLE' | translate }}</h3>
+    </div>
+  </ng-template>
+  
+  <form [formGroup]="checkoutForm" class="space-y-4">
+    <!-- Address Name -->
+    <div>
+      <label for="name" class="block text-sm font-medium text-color mb-2">
+        {{ 'ADDRESS.LABEL' | translate }} <span class="text-red-500">{{ 'ADDRESS.REQUIRED_FIELD' | translate }}</span>
+      </label>
+      <input
+        id="name"
+        pInputText
+        formControlName="name"
+        [placeholder]="'ADDRESS.LABEL_PLACEHOLDER' | translate"
+        class="w-full"
+        [class.p-invalid]="isFieldInvalid('name')"
+        aria-describedby="name-error" />
+      @if (isFieldInvalid('name')) {
+        <small id="name-error" class="text-red-500 mt-1 block">
+          @if (checkoutForm.get('name')?.errors?.['required']) {
+            {{ 'ADDRESS.LABEL_REQUIRED' | translate }}
+          }
+          @if (checkoutForm.get('name')?.errors?.['minlength']) {
+            {{ 'ADDRESS.LABEL_MIN_LENGTH' | translate }}
+          }
+        </small>
+      }
+      <small class="text-muted-color text-xs mt-1 block">
+        {{ 'ADDRESS.LABEL_HELP' | translate }}
+      </small>
+    </div>
+
+    <!-- Address Details -->
+    <div>
+      <label for="details" class="block text-sm font-medium text-color mb-2">
+        {{ 'ADDRESS.DETAILS' | translate }} <span class="text-red-500">{{ 'ADDRESS.REQUIRED_FIELD' | translate }}</span>
+      </label>
+      <textarea
+        id="details"
+        pTextarea
+        formControlName="details"
+        [placeholder]="'ADDRESS.DETAILS_PLACEHOLDER' | translate"
+        rows="3"
+        class="w-full"
+        [class.p-invalid]="isFieldInvalid('details')"
+        aria-describedby="details-error">
+      </textarea>
+      @if (isFieldInvalid('details')) {
+        <small id="details-error" class="text-red-500 mt-1 block">
+          @if (checkoutForm.get('details')?.errors?.['required']) {
+            {{ 'ADDRESS.DETAILS_REQUIRED' | translate }}
+          }
+          @if (checkoutForm.get('details')?.errors?.['minAddressLength']) {
+            {{ 'ADDRESS.DETAILS_MIN_LENGTH' | translate }}
+          }
+        </small>
+      }
+    </div>
+
+    <!-- Phone Number -->
+    <div>
+      <label for="phone" class="block text-sm font-medium text-color mb-2">
+        {{ 'ADDRESS.PHONE' | translate }} <span class="text-red-500">{{ 'ADDRESS.REQUIRED_FIELD' | translate }}</span>
+      </label>
+      <input
+        id="phone"
+        pInputText
+        formControlName="phone"
+        [placeholder]="'ADDRESS.PHONE_PLACEHOLDER' | translate"
+        class="w-full"
+        [class.p-invalid]="isFieldInvalid('phone')"
+        aria-describedby="phone-error" />
+      @if (isFieldInvalid('phone')) {
+        <small id="phone-error" class="text-red-500 mt-1 block">
+          @if (checkoutForm.get('phone')?.errors?.['required']) {
+            {{ 'ADDRESS.PHONE_REQUIRED' | translate }}
+          }
+          @if (checkoutForm.get('phone')?.errors?.['invalidEgyptianPhone']) {
+            {{ 'ADDRESS.PHONE_INVALID' | translate }}
+          }
+        </small>
+      }
+    </div>
+
+    <!-- City -->
+    <div>
+      <label for="city" class="block text-sm font-medium text-color mb-2">
+        {{ 'ADDRESS.CITY' | translate }} <span class="text-red-500">{{ 'ADDRESS.REQUIRED_FIELD' | translate }}</span>
+      </label>
+      <p-select
+        formControlName="city"
+        [options]="egyptianCities"
+        [placeholder]="'ADDRESS.CITY_PLACEHOLDER' | translate"
+        [showClear]="true"
+        [filter]="true"
+        filterBy="label"
+        class="w-full"
+        [class.p-invalid]="isFieldInvalid('city')"
+        aria-describedby="city-error">
+      </p-select>
+      @if (isFieldInvalid('city')) {
+        <small id="city-error" class="text-red-500 mt-1 block">
+          {{ 'ADDRESS.CITY_REQUIRED' | translate }}
+        </small>
+      }
+    </div>
+  </form>
+</p-card>
+
